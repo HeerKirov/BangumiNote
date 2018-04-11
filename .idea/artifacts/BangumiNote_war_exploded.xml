@@ -1,0 +1,36 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="BangumiNote:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/BangumiNote_war_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="BangumiNote/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="BangumiNote" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Spring-4.3.14.RELEASE" />
+          <element id="library" level="project" name="Spring Web Services-2.0.2" />
+          <element id="library" level="project" name="Spring MVC-4.3.14.RELEASE" />
+          <element id="library" level="project" name="KotlinJavaRuntime (3)" />
+          <element id="library" level="project" name="org.codehaus.jackson:jackson-mapper-asl:1.9.13" />
+          <element id="library" level="project" name="com.alibaba:fastjson:1.2.16" />
+          <element id="library" level="project" name="junit:junit:4.12" />
+          <element id="library" level="project" name="Hibernate 5.2.14-5.2.14" />
+          <element id="library" level="project" name="postgresql-42.2.2" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.8.5" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.8.5" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.8.5" />
+          <element id="library" level="project" name="Maven: javax.servlet:servlet-api:3.0-alpha-1" />
+          <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jre7:1.2.30" />
+          <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jre8:1.2.30" />
+          <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.2.30" />
+          <element id="library" level="project" name="Maven: org.jetbrains:annotations:13.0" />
+          <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.7" />
+          <element id="library" level="project" name="Maven: com.alibaba:druid:1.1.9" />
+          <element id="library" level="project" name="Maven: commons-dbcp:commons-dbcp:1.4" />
+          <element id="library" level="project" name="Maven: commons-pool:commons-pool:1.4" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

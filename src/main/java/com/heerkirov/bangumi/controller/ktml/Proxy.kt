@@ -1,0 +1,37 @@
+package com.heerkirov.bangumi.controller.ktml
+
+import com.heerkirov.ktml.builder.ConstProxy
+import org.springframework.stereotype.Component
+
+@Component
+class Proxy : ConstProxy({
+    dim("val_logo", "番组笔记")
+    //web login系列地址
+    url("web_login", {"/web/login"})
+    url("web_register", {"/web/register"})
+    //home系列地址
+    url("web_home", {"/web/home"})
+    //diary系列地址
+    url("web_diary", {"/web/diary"})
+    //data系列地址
+    url("web_data", {"/web/data"})
+    url("web_data_series_list", {"/web/data/series"})
+    url("web_data_series_create", {"/web/data/series/create"})
+    url("web_data_series_detail", {"/web/data/series/info/${it["id"]?:""}"})
+    url("web_data_author_list", {"/web/data/authors"})
+    url("web_data_author_create", {"/web/data/authors/create"})
+    url("web_data_author_detail", {"/web/data/authors/info/${it["id"]?:""}"})
+    url("web_data_company_list", {"/web/data/companies"})
+    url("web_data_anime_list", {"/web/data/animes"})
+    //statistics系列地址
+    url("web_statistics", {"/web/statistics"})
+    //user系列api
+    url("api_user_login", {"/api/user/login.json"})
+    url("api_user_logout", {"/api/user/logout.json"})
+    url("api_user_register", {"/api/user/register.json"})
+    //content系列api
+    url("api_content_series", {"/api/content/series.json"})
+    url("api_content_series_detail", {"/api/content/series/${it["id"]?:""}.json"})
+    url("api_content_author", {"/api/content/authors.json"})
+    url("api_content_author_detail", {"/api/content/authors/${it["id"]?:""}.json"})
+})

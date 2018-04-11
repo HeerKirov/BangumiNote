@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>BangumiNote</title>
+    <link href="/BangumiNote/web/static/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="/BangumiNote/web/static/jQuery/jquery-3.3.1.min.js"></script>
+    <script src="/BangumiNote/web/static/bootstrap/js/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+<body>
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+   <a class="navbar-brand" href="#">BangumiNote</a>
+    <!-- Toggler/collapsibe Button -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsible_navbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar links -->
+    <div class="collapse navbar-collapse" id="collapsible_navbar">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/web/home/home">主页</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">追番ing</a> <!-- TODO -->
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">数据库</a> <!-- TODO -->
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">统计</a> <!-- TODO -->
+            </li>
+        </ul>
+    </div>
+    <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+            <a href="#" class=" nav-link dropdown-toggle" data-toggle="dropdown">
+                USER <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link text-dark" href="#">资料</a></li>
+                <li><a class="nav-link text-dark" href="#">登出</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<div class="container">
+    <div class="row m-4"></div>
+    <div class="row">
+        <div class="col-md-4 col-lg-8"></div>
+        <div class="col-md-8 col-lg-4 bg-light jumbotron">
+            <div class="row mb-4">
+                <label class="col-lg-12 text-center">用户登录</label>
+            </div>
+            <form method="post" id="form-login">
+                <div id="div-username" class="form-group row">
+                    <label class="col-lg-3 form-control-label" for="login-username">ID</label>
+                    <div class="col-lg-9">
+                        <input type="text" maxlength="16" class="form-control" id="login-username" name="username" placeholder="请输入用户ID">
+                    </div>
+                </div>
+                <div id="div-password" class="form-group row">
+                    <label class="col-lg-3 form-control-label" for="login-password">密码</label>
+                    <div class="col-lg-9">
+                        <input type="password" maxlength="32" class="form-control" id="login-password" name="password" placeholder="请输入密码">
+                    </div>
+                </div>
+            </form>
+            <div class="row mt-4 mb-4">
+                <div class="col-lg-3"></div>
+                <div class="col-lg-6 btn-group">
+                    <button id="btn-login" class="btn btn-primary col" onclick="do_login()">登录</button>
+                    <button id="btn-register" class="btn btn-secondary col" onclick="register()">注册</button>
+                </div>
+                <div class="col-lg-3"></div>
+            </div>
+            <div id="login-alert" class="alert alert-danger">
+                <strong>错误</strong> 登录失败。请检查用户名和密码。
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="container-fluid">
+    <div class="row mt-5">
+        <div class="col">
+            <label class="col-lg-12 text-center">BangumiNote@HeerKirov</label>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+    function do_login(){
+        var data = {
+            username: $("#login-username").val(),
+            password: $("#login-password").val()
+        };
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: "/api/user/login",
+            data: data,
+            success: function(ret) {
+                location.href = "#" //TODO
+            },
+            error: function (ret) {
+                $("#login-alert").show()
+            }
+        });
+    }
+    function register() {
+        location.href = "register.html"
+    }
+    $(document).ready(function () {
+        $("#login-alert").hide()
+    })
+</script>
+</html>
