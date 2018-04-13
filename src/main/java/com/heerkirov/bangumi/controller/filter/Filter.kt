@@ -6,7 +6,6 @@ import com.heerkirov.bangumi.model.base.ModelInterface
 import org.hibernate.criterion.Criterion
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Restrictions
-import org.jetbrains.annotations.Mutable
 import kotlin.reflect.KClass
 
 /*用于查询的参数过滤器。功能：
@@ -106,12 +105,12 @@ class Filter(private val searchMap: Array<String> = arrayOf(),
             }
         }
         //处理search参数
-        //从search获得的内容会转换为N条where条件。同一个parameter下的条件用AND连接，多个parameter下的多个条件用OR连接。
+        //从search获得的内容会转换为N条where条件。同一个parameter下的条件用OR连接，多个parameter下的多个条件用OR连接。
         if(parameters.containsKey(SEARCH_NAME)){
             val retSearch = ArrayList<Criterion>()
             val param = parameters[SEARCH_NAME]
             searchMap.forEach { searchName ->
-                param.analysisList { FilterType.LIKE.getCriterion(searchName, it) }.recursiveConnect { a, b ->Restrictions.and(a, b) }?.let { retSearch.add(it) }
+                param.analysisList { FilterType.LIKE.getCriterion(searchName, it) }.recursiveConnect { a, b ->Restrictions.or(a, b) }?.let { retSearch.add(it) }
             }
             retSearch.recursiveConnect { a, b -> Restrictions.or(a, b) }?.let { retFilters.add(it) }
         }

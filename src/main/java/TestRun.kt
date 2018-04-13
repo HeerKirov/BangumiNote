@@ -1,7 +1,12 @@
 import com.heerkirov.bangumi.model.Anime
+import com.heerkirov.bangumi.model.Author
 import com.heerkirov.bangumi.model.Series
+import org.hibernate.FetchMode
 import org.hibernate.cfg.Configuration
-import org.hibernate.criterion.Restrictions.*
+import org.hibernate.criterion.CriteriaSpecification
+import org.hibernate.criterion.MatchMode
+import org.hibernate.criterion.Projections
+import org.hibernate.criterion.Restrictions
 import java.util.*
 
 fun main(args: Array<String>){
@@ -9,16 +14,12 @@ fun main(args: Array<String>){
     val session = factory.openSession()
     val tx = session.beginTransaction()
 
-    val series = session.createCriteria(Series::class.java).add(eq("id", 40)).uniqueResult() as Series
-
-    val user = series.user!!
-
-    val oldobj = series.animeList.first()
-    val newobj = Anime(id = oldobj.id, name = "new obj animeRRR", uid = oldobj.uid, type = "novel", user= user, createTime = Calendar.getInstance(), updateTime = Calendar.getInstance())
-
-    session.save(newobj)
-    session.update(series)
-    session.update(user)
+    val anime = session.createCriteria(Anime::class.java)
+            .setFetchMode("authorList", FetchMode.SELECT)
+            .add(Restrictions.ilike("keyword", "1", MatchMode.ANYWHERE))
+            .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
+            .list()
+    println(anime)
     tx.commit()
     session.close()
 }

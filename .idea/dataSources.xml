@@ -10,17 +10,6 @@
         <property name="ApplicationName" value="DataGrip" />
       </driver-properties>
     </data-source>
-    <data-source source="LOCAL" name="hibernate.cfg.xml/Hibernate" uuid="74c4c55c-5197-4505-b2e7-5bedff257f56">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <imported>true</imported>
-      <remarks>$PROJECT_DIR$/src/hibernate.cfg.xml</remarks>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://120.25.229.109:5432/bangumi_note</jdbc-url>
-      <driver-properties>
-        <property name="ApplicationName" value="DataGrip" />
-      </driver-properties>
-    </data-source>
     <data-source source="LOCAL" name="bangumi_note@localhost" uuid="326b5700-ef6d-496f-a355-974c3958dfcd">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>

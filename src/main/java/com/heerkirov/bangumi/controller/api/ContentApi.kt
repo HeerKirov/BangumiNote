@@ -108,10 +108,10 @@ class AnimeApi(@Autowired private val animeService: AnimeService): UserBelongRes
             ModelConverter.Field("uid", allowToObject = false, converter = IntConverter()),
             ModelConverter.Field("name", notBlank = true, converter = StringConverter()),
             ModelConverter.Field("originName", jsonName = "origin_name", notNull = false, required = false, converter = StringConverter()),
-            ModelConverter.Field("otherName", jsonName = "other_name", default = listOf(), converter = ListConverter(String::class, converter = StringConverter())),
+            ModelConverter.Field("otherName", jsonName = "other_name", notNull = false, required = false, converter = StringConverter()),
 
             ModelConverter.Field("type", notBlank = true, default = "other", converter = StringConverter(limitSet = setOf("novel", "comic", "game", "origin", "other"))),
-            ModelConverter.Field("keyword", default = listOf(), converter = ListConverter(String::class, converter = StringConverter())),
+            ModelConverter.Field("keyword", notNull = false, required = false, converter = StringConverter()),
             ModelConverter.Field("series", notNull = false, converter = series_converter),
             ModelConverter.Field("authorList", jsonName = "author", converter = SetConverter(Author::class, converter = author_converter)),
             ModelConverter.Field("createTime", jsonName = "create_time", allowToObject = false, converter = DateTimeConverter()),
@@ -127,15 +127,17 @@ class AnimeApi(@Autowired private val animeService: AnimeService): UserBelongRes
             ModelConverter.Field("levelR18", jsonName = "level_r18", required = false, notNull = false, converter = DoubleConverter()),
             ModelConverter.Field("levelR18G", jsonName = "level_r18g", required = false, notNull = false, converter = DoubleConverter())
     ))
-    override val filter: Filter = Filter(searchMap = arrayOf("name", "originName"), //TODO 最好想个办法能筛选othername和keyword……这么搞就失去用array的意义了……
+    override val filter: Filter = Filter(searchMap = arrayOf("name", "originName", "otherName", "keyword"), //TODO 最好想个办法能筛选othername和keyword……这么搞就失去用array的意义了……
             orderMap = arrayOf(
                     Filter.OrderField("id"),
                     Filter.OrderField("uid"),
                     Filter.OrderField("name"),
                     Filter.OrderField("origin_name", modelName = "originName"),
-                    Filter.OrderField("type", modelName = "type"),
-                    Filter.OrderField("series", modelName = "seriesId"),
-                    Filter.OrderField("author", modelName = "authorId", innerJoin = "AuthorToAnime"),
+                    Filter.OrderField("other_name", modelName = "otherName"),
+                    Filter.OrderField("type"),
+                    Filter.OrderField("keyword"),
+                    Filter.OrderField("series", modelName = "series.id"),
+                    Filter.OrderField("author", modelName = "id", innerJoin = "authorList"),
                     Filter.OrderField("score_like", modelName = "scoreLike"),
                     Filter.OrderField("score_patient", modelName = "scorePatient"),
                     Filter.OrderField("make_make", modelName = "makeMake"),
@@ -153,8 +155,8 @@ class AnimeApi(@Autowired private val animeService: AnimeService): UserBelongRes
                     Filter.FilterField(String::class, "name"),
                     Filter.FilterField(String::class, "origin_name", modelName = "originName"),
                     Filter.FilterField(String::class, "type"),
-                    Filter.FilterField(Int::class, "series_id"),
-                    Filter.FilterField(Int::class, "author_id", innerJoin = "AuthorToAnime")))
+                    Filter.FilterField(Int::class, "series_id", modelName = "series.id"),
+                    Filter.FilterField(Int::class, "author_id", innerJoin = "authorList", modelName = "id")))
 
 
 

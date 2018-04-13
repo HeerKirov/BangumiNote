@@ -5,10 +5,8 @@ import com.heerkirov.bangumi.util.join
 import org.hibernate.Criteria
 import org.hibernate.HibernateException
 import org.hibernate.Session
-import org.hibernate.criterion.Criterion
-import org.hibernate.criterion.Order
-import org.hibernate.criterion.Projection
-import org.hibernate.criterion.Projections
+import org.hibernate.criterion.*
+import org.hibernate.transform.ResultTransformer
 import java.io.Serializable
 import kotlin.reflect.KClass
 
@@ -20,14 +18,24 @@ class DatabaseMiddleware(private val session: Session) {
 
     //通过直接传入模型进行数据库操作的部分函数。
     fun create(obj: ModelInterface): Serializable {
-        //TODO 修正所有的查询操作。捕获HibernateException，并在抛出之前尝试关闭连接。
-        return session.save(obj)
+        try {
+            return session.save(obj)
+        }catch (e: HibernateException) {
+            if(session.isOpen)session.close()
+            throw e
+        }
     }
     fun update(obj: ModelInterface){
-        session.saveOrUpdate(obj)
+        try{session.update(obj)}catch (e: HibernateException) {
+            if(session.isOpen)session.close()
+            throw e
+        }
     }
     fun delete(obj: ModelInterface){
-        session.delete(obj)
+        try{session.delete(obj)}catch (e: HibernateException) {
+            if(session.isOpen)session.close()
+            throw e
+        }
     }
     //通过HQL进行数据库操作的部分函数。
     fun updateAuto(table: String): UpdateMiddleware = UpdateMiddleware(this, session, table, true)
@@ -81,7 +89,10 @@ class DatabaseMiddleware(private val session: Session) {
                         " SET ${setMap.asIterable().join(", "){"${it.key}: ${it.value}"}} " else " " +
                             whereSentence
             val query = session.createQuery(hql)
-            val result = query.executeUpdate()
+            val result = try{ query.executeUpdate() }catch (e: HibernateException) {
+                if(session.isOpen)session.close()
+                throw e
+            }
             if(cls)db.commitAndClose()
             return result
         }
@@ -104,7 +115,10 @@ class DatabaseMiddleware(private val session: Session) {
         fun commit(): Int {
             val hql = "DELETE FROM $table ${if(whereSentence.isNotBlank())"WHERE" else ""}$whereSentence"
             val query = session.createQuery(hql)
-            val result = query.executeUpdate()
+            val result = try{ query.executeUpdate() }catch (e: HibernateException) {
+                if(session.isOpen)session.close()
+                throw e
+            }
             if(cls)db.commitAndClose()
             return result
         }
@@ -123,6 +137,7 @@ class DatabaseMiddleware(private val session: Session) {
         private val innerWhereList: HashMap<String, ArrayList<Criterion>> = HashMap()
         private val innerOrderList: HashMap<String, ArrayList<Order>> = HashMap()
         private var projectList: Projection? = null
+        private val joinSelect: ArrayList<String> = arrayListOf()
         fun where(condition: Criterion): QueryMiddleware<T> {
             whereList.add(condition)
             return this
@@ -172,6 +187,15 @@ class DatabaseMiddleware(private val session: Session) {
             }
             return this
         }
+        fun joinSelect(vararg fields: String): QueryMiddleware<T> {
+            //这个函数会添加一系列字段名。这些字段在查询时，使用FetchMode.SELECT的分离查询模式。
+            joinSelect.addAll(fields)
+            return this
+        }
+        fun joinSelect(fields: List<String>): QueryMiddleware<T> {
+            joinSelect.addAll(fields)
+            return this
+        }
 
         private fun Criteria.appendWhere(): Criteria {
             whereList.forEach { this.add(it) }
@@ -200,6 +224,10 @@ class DatabaseMiddleware(private val session: Session) {
             }
             return cr
         }
+        private fun Criteria.appendFetchModeSelect(): Criteria {
+            joinSelect.forEach { this.setFetchMode(it, org.hibernate.FetchMode.SELECT) }
+            return this
+        }
 
         fun qAll(): QueryAllStruct<T> {
             //这是一个为分页特别准备的查询函数。它除查询标准列表之外，还会查询本查询条件下的总条数，并返回首条index。
@@ -207,14 +235,23 @@ class DatabaseMiddleware(private val session: Session) {
             val retIndex: Int = pageFirst?:0
             val retCount: Long?
             //首先不添加分页信息，得到总条目数目
-            val cr1 = session.createCriteria(clazz.java).appendWhere().innerJoin(order = false).setProjection(Projections.rowCount())
-            val ret1 = cr1.list()
-            retCount = if(ret1.isNotEmpty())ret1[0] as Long else 0
+            val cr1 = session.createCriteria(clazz.java).appendWhere().appendFetchModeSelect()
+                    .innerJoin(order = false)
+                    .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
+            val ret1 = try{ cr1.list() }catch (e: HibernateException) {
+                if(session.isOpen)session.close()
+                throw e
+            }
+            retCount = if(ret1.isNotEmpty())ret1.size.toLong() else 0
 
             //然后添加分页信息，并得到数据
             val cr2 = session.createCriteria(clazz.java)
-            cr2.appendWhere().appendOrder().innerJoin().appendProject().appendPage()
-            val ret2 = cr2.list()
+            cr2.appendWhere().appendOrder().appendFetchModeSelect().innerJoin().appendProject().appendPage()
+                    .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
+            val ret2 = try{ cr2.list() }catch (e: HibernateException) {
+                if(session.isOpen)session.close()
+                throw e
+            }
             retContent = ret2.map { it!!.let { it as T }  }
 
             if(cls)db.commitAndClose()
@@ -222,18 +259,26 @@ class DatabaseMiddleware(private val session: Session) {
         }
         fun all(): List<T> {
             val cr = session.createCriteria(clazz.java)
-            cr.appendWhere().appendOrder().innerJoin().appendProject().appendPage()
-            val ret = cr.list()
+            cr.appendWhere().appendOrder().appendFetchModeSelect().innerJoin().appendProject().appendPage()
+                    .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
+            val ret = try{ cr.list() }catch (e: HibernateException) {
+                if(session.isOpen)session.close()
+                throw e
+            }
             if(cls)db.commitAndClose()
             return ret.map { it!!.let { it as T }  }
         }
         fun first(): T? {
             val cr = session.createCriteria(clazz.java)
-            cr.appendWhere().appendOrder().innerJoin().appendProject()
+            cr.appendWhere().appendOrder().appendFetchModeSelect().innerJoin().appendProject()
+                    .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
             pageFirst?.let { cr.setFirstResult(it) }
             cr.setMaxResults(1)
 
-            val ret = cr.list()
+            val ret = try{ cr.list() }catch (e: HibernateException) {
+                if(session.isOpen)session.close()
+                throw e
+            }
             if(cls)db.commitAndClose()
             if(ret.size>0){return ret.first()!!.let { it as T }}else{return null}
 
@@ -243,19 +288,27 @@ class DatabaseMiddleware(private val session: Session) {
             if(pageCount in 0..index+1) {
                 return null
             }else{
-                cr.appendWhere().appendOrder().innerJoin().appendProject()
+                cr.appendWhere().appendOrder().appendFetchModeSelect().innerJoin().appendProject()
+                        .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
                 pageFirst?.let { cr.setFirstResult(it+index) }
                 cr.setMaxResults(1)
-                val ret = cr.list()
+                val ret = try{ cr.list() }catch (e: HibernateException) {
+                    if(session.isOpen)session.close()
+                    throw e
+                }
                 if(cls)db.commitAndClose()
                 if(ret.size>0){return ret[0]!!.let { it as T }}else{return null}
             }
         }
         fun count(): Long {
             val cr = session.createCriteria(clazz.java)
-            cr.appendWhere().innerJoin(order = false).appendPage()
+            cr.appendWhere().appendFetchModeSelect().innerJoin(order = false).appendPage()
+                    .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
             cr.setProjection(Projections.rowCount())
-            val ret = cr.list()
+            val ret = try{ cr.list() }catch (e: HibernateException) {
+                if(session.isOpen)session.close()
+                throw e
+            }
             if(cls)db.commitAndClose()
             return if(ret.isNotEmpty())ret[0] as Long else 0
         }

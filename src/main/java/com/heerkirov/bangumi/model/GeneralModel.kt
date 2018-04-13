@@ -41,7 +41,7 @@ class Author(
         @Column(name = "create_time", nullable = false)var createTime: Calendar? = null,
         @Column(name = "update_time", nullable = false)var updateTime: Calendar? = null,
 
-        @ManyToMany(mappedBy = "authorList", fetch = FetchType.EAGER) var AnimeList: Set<Anime> = HashSet()
+        @ManyToMany(targetEntity = Anime::class, mappedBy = "authorList", fetch = FetchType.EAGER) var AnimeList: Set<Anime> = HashSet()
 ): UBModel()
 
 @Entity @Table(name = "public.company")
@@ -60,19 +60,18 @@ class Company(
 
 @Entity @Table(name = "public.anime")
 @TypeDef(name = "array", typeClass = ArrayType::class)
-class Anime @JvmOverloads constructor(
+class Anime constructor(
         @Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="ANIME_ID_SEQ")
         @SequenceGenerator(name="ANIME_ID_SEQ", sequenceName="anime_id_seq", allocationSize = 1)
         @Column(name = "id")var id: Int? = null,
         @Column(name = "uid", nullable = false)var uid: Int? = null,
         @Column(name = "name", nullable = false, length = 128)var name: String = "",
-        @Column(name = "other_names", nullable = false)@Type(type = "array")var otherName: List<String> = ArrayList(),
+        @Column(name = "other_name", length = 128)var otherName: String? = null,
         @Column(name = "origin_name", length = 128)var originName: String? = null,
         @Column(name = "type", length = 12, nullable = false)var type: String = "other", //原作类型。[小说/漫画/游戏/原创/其他][novel/comic/game/origin/other]
-        @Column(name = "keyword", nullable = false)@Type(type = "array")var keyword: List<String> = ArrayList(),
+        @Column(name = "keyword", length = 128)var keyword: String? = null,
         @ManyToOne@JoinColumn(name = "series_id")var series: Series? = null,
-        //TODO 多对多的级联操作依然不对。需要研究。
-        @ManyToMany(fetch = FetchType.EAGER)@Cascade(value = org.hibernate.annotations.CascadeType.SAVE_UPDATE)@JoinTable(name = "public.author_to_anime",
+        @ManyToMany(targetEntity = Author::class,  fetch = FetchType.EAGER)@JoinTable(name = "public.author_to_anime",
                 joinColumns = [JoinColumn(name = "anime_id")],
                 inverseJoinColumns = [JoinColumn(name = "author_id")]) var authorList: Set<Author> = HashSet(),
 

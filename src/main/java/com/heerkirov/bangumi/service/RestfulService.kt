@@ -10,6 +10,7 @@ import org.hibernate.criterion.Restrictions
 import java.util.*
 import kotlin.collections.HashSet
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 
 /**符合一整套REST规范的Service层基础接口。
  * 它有几个公用参数：
@@ -64,12 +65,15 @@ interface RestfulService<T> where T: ModelInterface {
         }else if(notNull) throw NullValueError(fieldName)
     }
     /**这个函数会按照标准流程处理一个ManyToMany映射字段。
+     * 首先将字段按照空列表保存一次，防止产生级联BUG。
      * 对于Set列表内的每一个origin model：
      * 1. 如果字段值有id，就视作已经存在的model，查找这些id并依次检查存在性和user所属，然后加入Set。
      * 2. 如果字段值没有id，就视作新建的model，赋予初始化，然后加入Set。
      */
     fun<T: UBModel> DatabaseMiddleware.mappingSetTreat(obj: ModelInterface, fieldName: String, clazz: KClass<T>, user: User, fieldPrimaryKey: String = "id") {
         val originList = obj.get<Set<T>>(fieldName)
+        obj.set(fieldName, HashSet<T>())
+        this.update(obj)
         val newList = HashSet<T>()
         if(originList != null) {
             for(origin in originList) {
@@ -88,6 +92,51 @@ interface RestfulService<T> where T: ModelInterface {
             }
         }
         obj.set(fieldName, newList)
+    }
+
+    /**这个函数会按照特殊流程处理一个ManyToMany映射字段。
+     * 首先，收集所有存在的id构成idlist。查找Middle中所有属于obj.fieldName但是不属于idlist的，删除。
+     * 然后，查找Middle中所有属于obj.fieldName且属于idlist的，这是已经存在的部分，不动。
+     * 然后，排除上面存在的部分，idlist中剩下的全部添加新的Middle。
+     * 最后，收集所有id不存在的，新建并创建Middle。
+     */
+    fun<T: UBModel, MID: ModelInterface> DatabaseMiddleware.mappingManyTreat(obj: ModelInterface, fieldName: String, clazz: KClass<T>, user: User,
+                                                        middleClazz: KClass<MID>, orderKey: String, itemKey: String, objPrimaryKey: String = "id", fieldPrimaryKey: String = "id") {
+        val originList = obj.get<Set<T>>(fieldName)
+        if(originList!=null) {
+            //抓取obj的id。
+            val objId = obj.get<Int>(objPrimaryKey)
+            //收集所有存在的id，表示当前存在的、希望添加进fieldName的model。
+            val idList = originList.filter { it.get<Int>(fieldPrimaryKey) != null }.map { it.get<Int>(fieldPrimaryKey) }.toHashSet()
+            //查询中间件，查询所有与当前obj相关的。
+            val middles = this.query(middleClazz).where(Restrictions.eq(orderKey, objId)).all()
+            for(middle in middles) {
+                val itemId = middle.get<Int>(itemKey)
+                //如果中间件的itemKey不在idList中，它需要被删除。
+                if(itemId !in idList) this.delete(middle)
+                //如果在，它需要被保留。同时从idList中移除此id。
+                else idList.remove(itemId)
+            }
+            //最后idList留下的是需要新建中间件的。
+            for(id in idList) {
+                val newMiddle = middleClazz.createInstance()
+                newMiddle.set(orderKey, objId)
+                newMiddle.set(itemKey, id)
+                this.create(newMiddle)
+            }
+            //然后筛选那些没有id的，全部新建并新建中间件。
+            val newItems = originList.filter { it.get<Int>(fieldPrimaryKey) == null }
+            for(item in newItems) {
+                initializeUBModel(item, user, clazz)
+                this.create(item)
+                val newMiddle = middleClazz.createInstance()
+                newMiddle.set(orderKey, objId)
+                newMiddle.set(itemKey, item.get<Int>(fieldPrimaryKey))
+                this.create(newMiddle)
+            }
+        }else{
+            obj.set(fieldName, HashSet<T>())
+        }
     }
 }
 

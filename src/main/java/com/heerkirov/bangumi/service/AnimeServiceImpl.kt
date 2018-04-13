@@ -34,6 +34,7 @@ class AnimeServiceImpl(@Autowired val dao: Dao): AnimeService {
            //处理series的附加问题。
             mappingTreat(obj.obj, "series", Series::class, user)
             //处理author的附加问题。
+            //mappingManyTreat(obj.obj, "authorList", Author::class, user, AuthorToAnime::class, "animeId", "authorId")
             mappingSetTreat(obj.obj, "authorList", Author::class, user)
             //构造主要内容，并获得主键。
             val pkey = this.create(obj.obj) as Int
@@ -49,6 +50,7 @@ class AnimeServiceImpl(@Autowired val dao: Dao): AnimeService {
             //获得User并检查是否非空。
             val user = obj.obj.user!!
             mappingTreat(obj.obj, "series", Series::class, user)
+            //mappingManyTreat(obj.obj, "authorList", Author::class, user, AuthorToAnime::class, "animeId", "authorId")
             mappingSetTreat(obj.obj, "authorList", Author::class, user)
 
             this.update(obj.obj)
@@ -64,34 +66,36 @@ class AnimeServiceImpl(@Autowired val dao: Dao): AnimeService {
 
     override fun queryList(feature: QueryFeature?, appendItem: Set<String>?): QueryAllStruct<ServiceSet<Anime>> {
         return dao.dao<QueryAllStruct<ServiceSet<Anime>>> {
-            val qAll = this.query(Anime::class).feature(feature).qAll()
+            val qAll = this.query(Anime::class).feature(feature).joinSelect(fetchSelectList).qAll()
             QueryAllStruct(qAll.content.map { ServiceSet(it) }, qAll.index, qAll.count)
         }
     }
 
     override fun queryAll(feature: QueryFeature?, appendItem: Set<String>?): List<ServiceSet<Anime>> {
         return dao.dao<List<ServiceSet<Anime>>> {
-            val qAll = this.query(Anime::class).feature(feature).all()
+            val qAll = this.query(Anime::class).feature(feature).joinSelect(fetchSelectList).all()
             qAll.map { ServiceSet(it) }
         }
     }
 
     override fun queryGet(index: Int, feature: QueryFeature?, appendItem: Set<String>?): ServiceSet<Anime>? {
         return dao.dao<ServiceSet<Anime>?> {
-            val q = this.query(Anime::class).feature(feature).get(index)
+            val q = this.query(Anime::class).feature(feature).joinSelect(fetchSelectList).get(index)
             if(q != null){ServiceSet(q)}else null
         }
     }
 
     override fun queryFirst(feature: QueryFeature?, appendItem: Set<String>?): ServiceSet<Anime>? {
         return dao.dao<ServiceSet<Anime>?> {
-            val q = this.query(Anime::class).feature(feature).first()
+            val q = this.query(Anime::class).feature(feature).joinSelect(fetchSelectList).first()
             if(q != null){ServiceSet(q)}else null
         }
     }
 
     override fun queryExists(feature: QueryFeature?): Boolean {
-        return dao.dao<Boolean> { this.query(Anime::class).feature(feature).exists() }
+        return dao.dao<Boolean> { this.query(Anime::class).feature(feature).joinSelect(fetchSelectList).exists() }
     }
+
+    private val fetchSelectList = listOf("authorList")
 
 }
