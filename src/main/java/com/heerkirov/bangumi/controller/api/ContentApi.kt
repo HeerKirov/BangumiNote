@@ -91,12 +91,12 @@ class CompanyApi(@Autowired private val companyService: CompanyService): UserBel
 @Controller @RequestMapping("/api/content/animes")
 class AnimeApi(@Autowired private val animeService: AnimeService): UserBelongRestfulController<Anime, Int>(Anime::class) {
     override val service = animeService
-    private val series_converter: ModelConverter<Series> = IdConverter(Series::class, arrayOf(
+    private val seriesSubConverter: ModelConverter<Series> = IdConverter(Series::class, arrayOf(
             ModelConverter.Field("id", allowToObject = false, converter = IntConverter()),
             ModelConverter.Field("uid", allowToObject = false, converter = IntConverter()),
             ModelConverter.Field("name", notBlank = true, converter = StringConverter())
     ))
-    private val author_converter: ModelConverter<Author> = IdConverter(Author::class, arrayOf(
+    private val authorSubConverter: ModelConverter<Author> = IdConverter(Author::class, arrayOf(
             ModelConverter.Field("id", allowToObject = false, converter = IntConverter()),
             ModelConverter.Field("uid", allowToObject = false, converter = IntConverter()),
             ModelConverter.Field("name", notBlank = true, converter = StringConverter()),
@@ -112,8 +112,8 @@ class AnimeApi(@Autowired private val animeService: AnimeService): UserBelongRes
 
             ModelConverter.Field("type", notBlank = true, default = "other", converter = StringConverter(limitSet = setOf("novel", "comic", "game", "origin", "other"))),
             ModelConverter.Field("keyword", notNull = false, required = false, converter = StringConverter()),
-            ModelConverter.Field("series", notNull = false, converter = series_converter),
-            ModelConverter.Field("authorList", jsonName = "author", converter = SetConverter(Author::class, converter = author_converter)),
+            ModelConverter.Field("series", notNull = false, converter = seriesSubConverter),
+            ModelConverter.Field("authorList", jsonName = "author", converter = SetConverter(Author::class, converter = authorSubConverter)),
             ModelConverter.Field("createTime", jsonName = "create_time", allowToObject = false, converter = DateTimeConverter()),
             ModelConverter.Field("updateTime", jsonName = "update_time", allowToObject = false, converter = DateTimeConverter()),
 

@@ -26,7 +26,7 @@ interface ModelInterface {
 }
 
 interface UserBelongInterface : ModelInterface {
-    var userBelong: User
+    var userBelong: String
     var userBelongId: Int
 }
 interface DateTimeInterface : ModelInterface {
@@ -95,15 +95,15 @@ abstract class DTModel : Model(), DateTimeInterface {
 }
 //提供一个实现了UserBelong接口的默认实现。它通过反射查找默认的userId字段。
 abstract class UBModel : DTModel(), UserBelongInterface {
-    private val setMethod by lazy { this::class.java.getDeclaredMethod("setUser", User::class.java) }
-    private val getMethod by lazy { this::class.java.getDeclaredMethod("getUser") }
+    private val setMethod by lazy { this::class.java.getDeclaredMethod("setUserId", String::class.java) }
+    private val getMethod by lazy { this::class.java.getDeclaredMethod("getUserId") }
     private val setUMethod by lazy {
         //巨坑：kt的func(Int)翻译为java时是func(java.lang.Integer)，但是Int::class.java翻译过去是int。
         this::class.java.getDeclaredMethod("setUid", java.lang.Integer::class.java)
     }
     private val getUMethod by lazy { this::class.java.getDeclaredMethod("getUid") }
-    override var userBelong: User
-        get() = User::class.safeCast(getMethod.invoke(this))!!
+    override var userBelong: String
+        get() = String::class.safeCast(getMethod.invoke(this))!!
         set(value) {setMethod.invoke(this, value)}
     override var userBelongId: Int
         get() = Int::class.safeCast(getUMethod.invoke(this))!!

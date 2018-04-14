@@ -21,7 +21,7 @@ class Series(
         @Column(name = "name", length = 32, nullable = false)var name: String = "",
 
         @Column(name = "uid", nullable = false)var uid: Int? = null,
-        @ManyToOne@JoinColumn(name = "user_id", nullable = false) var user: User? = null,
+        @Column(name = "user_id", nullable = false) var userId: String? = null,
         @Column(name = "create_time", nullable = false)var createTime: Calendar? = null,
         @Column(name = "update_time", nullable = false)var updateTime: Calendar? = null,
 
@@ -37,7 +37,7 @@ class Author(
         @Column(name = "name", length = 32, nullable = false)var name: String = "",
         @Column(name = "origin_name", length = 32)var originName: String? = null,
 
-        @ManyToOne@JoinColumn(name = "user_id", nullable = false) var user: User? = null,
+        @Column(name = "user_id", nullable = false) var userId: String? = null,
         @Column(name = "create_time", nullable = false)var createTime: Calendar? = null,
         @Column(name = "update_time", nullable = false)var updateTime: Calendar? = null,
 
@@ -53,7 +53,7 @@ class Company(
         @Column(name = "name", length = 32, nullable = false)var name: String = "",
         @Column(name = "origin_name", length = 32)var originName: String? = null,
 
-        @ManyToOne@JoinColumn(name = "user_id", nullable = false) var user: User? = null,
+        @Column(name = "user_id", nullable = false) var userId: String? = null,
         @Column(name = "create_time", nullable = false)var createTime: Calendar? = null,
         @Column(name = "update_time", nullable = false)var updateTime: Calendar? = null
 ): UBModel()
@@ -75,7 +75,7 @@ class Anime constructor(
                 joinColumns = [JoinColumn(name = "anime_id")],
                 inverseJoinColumns = [JoinColumn(name = "author_id")]) var authorList: Set<Author> = HashSet(),
 
-        @ManyToOne@JoinColumn(name = "user_id", nullable = false) var user: User? = null,
+        @Column(name = "user_id", nullable = false) var userId: String? = null,
         @Column(name = "create_time", nullable = false)var createTime: Calendar? = null,
         @Column(name = "update_time", nullable = false)var updateTime: Calendar? = null,
 

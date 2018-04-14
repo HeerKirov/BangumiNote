@@ -29,7 +29,6 @@ import kotlin.reflect.KClass
 /*综合了大多数REST API所需功能的处理器。
 此处理器已经重写成对接当前RestService接口的、对接ServiceSet的处理器。
  */
-@Controller
 abstract class RestfulController<T, in KEY>(private val clazz: KClass<T>) : ApiController() where T: ModelInterface, KEY: Any {
     @Autowired private val security: Security? = null
     @Autowired private val request: HttpServletRequest? = null
@@ -205,17 +204,17 @@ abstract class DateFieldRestfulController<T, in KEY>(clazz: KClass<T>) : Restful
 abstract class UserBelongRestfulController<T, in KEY>(clazz: KClass<T>) : DateFieldRestfulController<T, KEY>(clazz)where T: UBModel, KEY: Any{
     override fun serviceQueryAll(service: RestfulService<T>, feature: QueryFeature?, appendItem: Set<String>?): QueryAllStruct<ServiceSet<T>> {
         val f = feature?:QueryFeature()
-        security().currentUser()?.let { user -> f.addWhere(Restrictions.eq("user", user)) }
+        security().currentUser()?.let { user -> f.addWhere(Restrictions.eq("userId", user.id)) }
         return super.serviceQueryAll(service, f, appendItem)
     }
 
     override fun serviceQueryFirst(service: RestfulService<T>, feature: QueryFeature?, appendItem: Set<String>?): ServiceSet<T>? {
         val f = feature?:QueryFeature()
-        security().currentUser()?.let { user -> f.addWhere(Restrictions.eq("user", user)) }
+        security().currentUser()?.let { user -> f.addWhere(Restrictions.eq("userId", user.id)) }
         return super.serviceQueryFirst(service, f, appendItem)
     }
 
     override fun modelNew(map: JSONObject): ServiceSet<T> {
-        return super.modelNew(map).also { ret -> security().currentUser()?.let { user -> ret.obj.userBelong = user } }
+        return super.modelNew(map).also { ret -> security().currentUser()?.let { user -> ret.obj.userBelong = user.id } }
     }
 }

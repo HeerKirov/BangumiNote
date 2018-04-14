@@ -3,6 +3,7 @@ package com.heerkirov.bangumi.controller.filter
 import com.heerkirov.bangumi.dao.DatabaseMiddleware
 import com.heerkirov.bangumi.dao.QueryFeature
 import com.heerkirov.bangumi.model.base.ModelInterface
+import org.hibernate.NullPrecedence
 import org.hibernate.criterion.Criterion
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Restrictions
@@ -14,6 +15,7 @@ import kotlin.reflect.KClass
     3. 在query时，提供排序功能。提供一个带ASC/DESC的字段列表，根据列表进行优先级排序。
     4. 在返回数组结果时，套用内容，自动根据参数进行分页。分页参数有两个，pageFirst和pageMaxResult。
 */
+//TODO 添加一个新HTTTP请求参数，启用该参数时会使Filter禁用分页。这个项目可以为回调列表请求服务。
 class Filter(private val searchMap: Array<String> = arrayOf(),
              private val orderMap: Array<OrderField> = arrayOf(),
              private val filterMap: Array<FilterField<*>> = arrayOf(),
@@ -133,11 +135,17 @@ class Filter(private val searchMap: Array<String> = arrayOf(),
                     if(enableOrderMaxIndex.containsKey(pName)){
                         val orderField = orderMap[enableOrderMaxIndex[pName]!!]
                         if(orderField.customOrder!=null){
-                            if(orderField.innerJoin!=null) innerOrders.mutPutAll(orderField.innerJoin, orderField.customOrder.invoke(orderField, desc))
-                            else retOrders.addAll(orderField.customOrder.invoke(orderField, desc))
+                            val ret = orderField.customOrder.invoke(orderField, desc).map { it.nulls(orderField.nullPosition) }
+                            if(orderField.innerJoin!=null)
+                                innerOrders.mutPutAll(orderField.innerJoin, ret)
+                            else
+                                retOrders.addAll(ret)
                         }else{
-                            if(orderField.innerJoin!=null) innerOrders.mutPut(orderField.innerJoin, if(desc)Order.desc(orderField.nameOfModel)else Order.asc(orderField.nameOfModel))
-                            else retOrders.add(if(desc)Order.desc(orderField.nameOfModel)else Order.asc(orderField.nameOfModel))
+                            val ret = (if(desc)Order.desc(orderField.nameOfModel)else Order.asc(orderField.nameOfModel)).nulls(orderField.nullPosition)
+                            if(orderField.innerJoin!=null)
+                                innerOrders.mutPut(orderField.innerJoin, ret)
+                            else
+                                retOrders.add(ret)
                         }
                     }
                 }
@@ -147,9 +155,9 @@ class Filter(private val searchMap: Array<String> = arrayOf(),
                 val orderField = orderMap[i]
                 val desc = orderField.default!!.toLowerCase() == "desc"
                 if(orderField.customOrder!=null){
-                    retOrders.addAll(orderField.customOrder.invoke(orderField, desc))
+                    retOrders.addAll(orderField.customOrder.invoke(orderField, desc).map { it.nulls(orderField.nullPosition) })
                 }else{
-                    retOrders.add(if(desc)Order.desc(orderField.nameOfModel)else Order.asc(orderField.nameOfModel))
+                    retOrders.add((if(desc)Order.desc(orderField.nameOfModel)else Order.asc(orderField.nameOfModel)).nulls(orderField.nullPosition))
                 }
             }
         }
@@ -169,6 +177,7 @@ class Filter(private val searchMap: Array<String> = arrayOf(),
         可以将field设为default，这样在没有任何order参数时，带有default标记的field会作为默认排序器。
      */
     class OrderField(val name: String, private val modelName: String? = null, val innerJoin: String? = null,
+                     val nullPosition: NullPrecedence = NullPrecedence.LAST,
                      val default: String? = null,
                      val customOrder: (OrderField.(Boolean)->List<Order>)? = null) {
         val nameOfModel: String get() = modelName?:name
@@ -182,11 +191,11 @@ class Filter(private val searchMap: Array<String> = arrayOf(),
         自定义行为传入一个Any参数代表经过转换后的域参数；传出自定义情况下生成的限定条件。
      */
     class FilterField<out T>(private val clazz: KClass<T>,
-                         val name: String, private val modelName: String? = null, val innerJoin: String? = null,
-                         val types: Array<FilterType>? = null,
-                         val default: T? = null,
-                         private val converter: ((String)->T)? = null,
-                         val customFilter: ((Any)->Criterion)? = null) where T: Any {
+                             val name: String, private val modelName: String? = null, val innerJoin: String? = null,
+                             val types: Array<FilterType>? = null,
+                             val default: T? = null,
+                             private val converter: ((String)->T)? = null,
+                             val customFilter: ((Any)->Criterion)? = null) where T: Any {
         val nameOfModel: String get() = modelName?:name
         val filterTypes: Array<FilterType> by lazy {
             types?://在type为空时，尝试按照常用类型施加一个默认列表。
