@@ -103,7 +103,7 @@ function build_detail(obj) {
         //返回一个函数，用在index下标的编辑按钮上。
         return function () {
             //在此ele允许编辑时，将其切换到edit状态。
-            if(_info.content[index].writable)set_field_state(index, "edit");
+            if((_info.content[index] instanceof Object) && _info.content[index].writable)set_field_state(index, "edit");
         }
     };
     var get_func_submit_btn = function (index) {
@@ -141,34 +141,36 @@ function build_detail(obj) {
         if(isfree()){
             run();
             var field = _info.content[index];
-            clear_err_message(index);
-            set_field_state(index, "loading");
-            var result = collect_and_check(index);
-            if(result!==undefined) {
-                var result_json = {};
-                result_json[field.field] = result;
-                if(_rest_com!==null&&$.isFunction(_rest_com["update"])) {
-                    _rest_com["update"](result_json, true, function (success, status, json) {
-                        if(success){
-                            //提交成功之后会修改展示的值。
-                            if(field.field in json)set_value(index, json[field.field]);
-                            set_field_state(index, "show");
-                        }else{
-                            clear_all_err_message();
-                            show_err_request(status, json);
-                            set_field_state(index, "edit");
-                        }
+            if(field instanceof  Object) {
+                clear_err_message(index);
+                set_field_state(index, "loading");
+                var result = collect_and_check(index);
+                if(result!==undefined) {
+                    var result_json = {};
+                    result_json[field.field] = result;
+                    if(_rest_com!==null&&$.isFunction(_rest_com["update"])) {
+                        _rest_com["update"](result_json, true, function (success, status, json) {
+                            if(success){
+                                //提交成功之后会修改展示的值。
+                                if(field.field in json)set_value(index, json[field.field]);
+                                set_field_state(index, "show");
+                            }else{
+                                clear_all_err_message();
+                                show_err_request(status, json);
+                                set_field_state(index, "edit");
+                            }
+                            free();
+                        })
+                    }else if(_data_set!==null&&$.isFunction(_data_set)) {
+                        _data_set(result_json);
+                        set_value(index, result);
+                        set_field_state(index, "show");
                         free();
-                    })
-                }else if(_data_set!==null&&$.isFunction(_data_set)) {
-                    _data_set(result_json);
-                    set_value(index, result);
-                    set_field_state(index, "show");
+                    }else{throw "No useful delegate function or component."}
+                }else{
+                    set_field_state(index, "edit");
                     free();
-                }else{throw "No useful delegate function or component."}
-            }else{
-                set_field_state(index, "edit");
-                free();
+                }
             }
         }
     };
@@ -292,33 +294,67 @@ function build_detail(obj) {
         return _panel_div;
     };
     var build_table = function () {
-        var tbody = $('<tbody></tbody>');
+        var tbody = $('<div class="p-1"></div>');
+        var collapse_index = 0;
+        var analysing_collapse = null;
         for(var i in _info.content) {
             var field = _info.content[i];
-            var result = build_detail_field_td(i, field);
-            _table_set[i] = result;
-            //切换行默认所处的状态。
-            if(field.defaultState!==null){
-                if(field.defaultState === "show")set_field_state(i, "show");
-                else if(field.defaultState === "edit" && field.partialWrite)set_field_state(i, "edit");
-            }else {
-                set_field_state(i, _all_field_state);
+            if(field instanceof Object) {
+                var result = build_detail_field_td(i, field);
+                _table_set[i] = result;
+                //切换行默认所处的状态。
+                if(field.defaultState!==null){
+                    if(field.defaultState === "show")set_field_state(i, "show");
+                    else if(field.defaultState === "edit" && field.partialWrite)set_field_state(i, "edit");
+                }else {
+                    set_field_state(i, _all_field_state);
+                }
+                //输入默认值。
+                if(field.defaultValue!==null)set_detail_field_value(field, result.read_ele, result.write_ele, field.defaultValue);
+                if(analysing_collapse === null) tbody.append(result.tr);
+                else analysing_collapse.append(result.tr);
+            }else if(field.substring(0, 2) === "hr") {
+                if(analysing_collapse === null) tbody.append($('<hr/>'));
+                else analysing_collapse.append($('<hr/>'))
+            }else if(field.substring(0, 8) === "collapse") {
+                var name = field.length > 9 ? field.substring(9): "";
+                var get_func_collapse = function (icon) {
+                    var collapse_state = true;
+                    return function () {
+                        collapse_state = !collapse_state;
+                        icon.attr("class", collapse_state?"fa fa-caret-down":"fa fa-caret-up");
+                    };
+                };
+                var collapse_icon = $('<i class="fa fa-caret-down"></i>');
+                var collapse_btn = $('<button class="btn btn-block btn-light text-dark" style="text-align: left" data-toggle="collapse"></button>')
+                    .attr("data-target", "#rest-collapse-" + collapse_index)
+                    .append(name + " ")
+                    .append(collapse_icon)
+                    .click(get_func_collapse(collapse_icon));
+                var collapse_panel = $('<div class="collapse"></div>')
+                    .attr("id", "rest-collapse-" + collapse_index);
+                analysing_collapse = collapse_panel;
+                collapse_index++;
+                tbody.append($('<div class="row"></div>')
+                    .append(collapse_btn))
+                    .append($('<div class="row mt-1 mb-1"></div>')
+                        .append($('<div class="col"></div>')
+                            .append(collapse_panel)));
+            }else if(field === "end") {
+                analysing_collapse = null;
             }
-            //输入默认值。
-            if(field.defaultValue!==null)set_detail_field_value(field, result.read_ele, result.write_ele, field.defaultValue);
-            tbody.append(result.tr);
         }
-        return $('<table class="table"></table>').append(tbody);
+        return tbody;
     };
     var build_detail_field_td = function(index, field) {
         //这个函数会构造一个完整的行，可以直接安插进表格里，具备完整的功能和引用。
-        var tr = $('<tr class="row"></tr>');
+        var tr = $('<div class="row mt-2 mb-2"></div>');
 
-        var td_header = $('<td class="col-3"></td>');
+        var td_header = $('<div class="col-lg-3 col-md-4 col-xs-11"></div>');
         var label = $('<label class="font-weight-bold"></label>').text(field.header);
         td_header.append(label);
 
-        var td_content = $('<td class="col-7"></td>');
+        var td_content = $('<div class="col-lg-8 col-md-7"></div>');
         var readEle = build_detail_field_read(field);
         var writeEle = build_detail_field_write(field);
         var loadingDiv = $('<div class="progress m-5"></div>')
@@ -326,7 +362,7 @@ function build_detail(obj) {
         var errorDiv = $('<div class="row"></div>');
         td_content.append(readEle).append(writeEle).append(loadingDiv).append(errorDiv);
 
-        var td_end = $('<td class="col-2"></td>');
+        var td_end = $('<div class="col-1"></div>');
         var updateBtn = $('<button class="btn btn-outline-secondary btn"></button>')
             .append($('<i class="fa fa-pencil"></i>'))
             .click(get_func_edit_btn(index));
@@ -445,7 +481,7 @@ function build_detail(obj) {
         var s = _table_set[index];
         var field = _info.content[index];
 
-        if(s){
+        if(field instanceof Object && s){
             _table_state[index] = state;
             if(state === "show") {
                 soh(field.readable, s.tr);
@@ -481,7 +517,9 @@ function build_detail(obj) {
     var set_value = function (index, value) {
         var set = _table_set[index];
         var field = _info.content[index];
-        set_detail_field_value(field, set.read_ele, set.write_ele, value);
+        if(field instanceof Object) {
+            set_detail_field_value(field, set.read_ele, set.write_ele, value);
+        }
     };
     var show_err_message = function (index, message) {
         //这会向指定的元素行推送一条错误。
@@ -515,12 +553,14 @@ function build_detail(obj) {
     };
     var collect_and_check = function (index) {
         var field = _info.content[index];
-        var ele = _table_set[index].write_ele;
-        try {
-            return get_detail_field_value(field, ele);
-        }catch(e){
-            show_err_message(index, e);
-            return undefined;
+        if(field instanceof Object) {
+            var ele = _table_set[index].write_ele;
+            try {
+                return get_detail_field_value(field, ele);
+            }catch(e){
+                show_err_message(index, e);
+                return undefined;
+            }
         }
     };
     var collect_all_and_check = function () {
@@ -528,7 +568,7 @@ function build_detail(obj) {
         var json = {};
         for(var i in _info.content) {
             var field = _info.content[i];
-            if(field.writable) {
+            if(field instanceof Object && field.writable) {
                 var value = collect_and_check(i);
                 if(value!==undefined){
                     json[field.field] = value;
@@ -565,10 +605,12 @@ function build_detail(obj) {
     var set_all_value = function (json) {
         for(var i in _info.content) {
             var field = _info.content[i];
-            var set = _table_set[i];
-            var value = json[field.field];
-            if(value!==undefined) {
-                set_detail_field_value(field, set.read_ele, set.write_ele, value);
+            if(field instanceof Object) {
+                var set = _table_set[i];
+                var value = json[field.field];
+                if(value!==undefined) {
+                    set_detail_field_value(field, set.read_ele, set.write_ele, value);
+                }
             }
         }
     };
@@ -647,18 +689,20 @@ function build_detail(obj) {
             //处理每一个field内容的默认值。
             for(var i in _info.content) {
                 var field = _info.content[i];
-                if(!("type" in field))field["type"] = null;
-                if(!("typeInfo" in field))field["typeInfo"] = {};
-                if(!("validate" in field))field["validate"] = null;
-                if(!("readable" in field))field["readable"] = true;
-                if(!("writable" in field))field["writable"] = true;
-                if(!("partialWrite" in field))field["partialWrite"] = true;
-                if(!("defaultValue" in field))field["defaultValue"] = null;
-                if(!("defaultState" in field))field["defaultState"] = null;
-                initialization_detail_field_info(field);
-                if(is_detail_field_read_only(field.type)){
-                    field.readable = true;
-                    field.writable = false;
+                if(field instanceof Object) {
+                    if(!("type" in field))field["type"] = null;
+                    if(!("typeInfo" in field))field["typeInfo"] = {};
+                    if(!("validate" in field))field["validate"] = null;
+                    if(!("readable" in field))field["readable"] = true;
+                    if(!("writable" in field))field["writable"] = true;
+                    if(!("partialWrite" in field))field["partialWrite"] = true;
+                    if(!("defaultValue" in field))field["defaultValue"] = null;
+                    if(!("defaultState" in field))field["defaultState"] = null;
+                    initialization_detail_field_info(field);
+                    if(is_detail_field_read_only(field.type)){
+                        field.readable = true;
+                        field.writable = false;
+                    }
                 }
             }
             _all_field_state = _info.defaultState === "show"?"show":_info.defaultState === "edit"?"all-edit":null;
@@ -731,7 +775,7 @@ function get_detail_field_value(field, ele) {
 }
 function set_detail_field_value(field, readEle, writeEle, value) {
     //这个函数会为field的ele赋值.为read组件和write组件同时赋值。如果存在不可读或不可写，对应的组件引用会为null。
-    if(field.readable||field.writable) {
+    if(field instanceof Object &&(field.readable||field.writable)) {
         if (field.type === null) detail_fields[default_detail_field_elements]["set"](field.typeInfo, readEle, writeEle, value);
         else if (field.type in detail_fields) detail_fields[field.type]["set"](field.typeInfo, readEle, writeEle, value);
     }
@@ -872,8 +916,105 @@ var detail_fields = {
             //更新read的值
             if(readEle)readEle.text(com_value);
         }
+    },
+    number: {
+        init: function (info) {
+            if(!("allowBlank" in info))info["allowBlank"] = true;
+            if(!("allowNull" in info))info["allowNull"] = false;
+            if(!("arrowButton" in info))info["arrowButton"] = false;
+            if(!("narrow" in info))info["narrow"] = false;
+            if(!("allowFloat" in info))info["allowFloat"] = true;
+        },
+        read: function (info) {
+            return $('<label></label>');
+        },
+        write: function (info) {
+            var number_change = function(delita) {
+                return function () {
+                    var value;
+                    try{value = this.get(info, ele);}catch(ex){return;}
+                    var min = undefined, max = undefined;
+                    if(info) {
+                        if("min" in info) min = info["min"];
+                        if("max" in info) max = info["max"];
+                    }
+                    if(delita>0&&(max===undefined||value<max)) value += delita;
+                    else if(delita<0&&(min===undefined||value>min)) value += delita;
+                    ret.val(value);
+                };
+            };
+            var ret = $('<input type="text" class="form-control"/>');
+            var arrowButton = false;
+            if(info){
+                if(("placeholder" in info))ret.attr("placeholder", info["placeholder"]);
+                if(("arrowButton" in info)&&info["arrowButton"])arrowButton = true;
+                if(("narrow" in info)&&info["narrow"])ret.attr("style", "width: 40%; text-align: center");
+            }
+            var ele;
+            if(arrowButton) {
+                ele = $('<div class="btn-group"></div>')
+                    .append($('<button type="button" class="btn btn-outline-secondary"></button>')
+                        .append($('<i class="fa fa-caret-left"></i>'))
+                        .click(number_change(-1)))
+                    .append(ret.attr("class", "form-control rounded-0"))
+                    .append($('<button type="button" class="btn btn-outline-secondary"></button>')
+                        .append($('<i class="fa fa-caret-right"></i>'))
+                        .click(number_change(1)));
+            }else {
+                ele = $('<div class="btn-group"></div>').append(ret);
+            }
+            return ele;
+        },
+        get: function (info, ele) {
+            var ret = ele.find(".form-control").val();
+            if(info){
+                if((!info.allowBlank)&&ret.length === 0)throw "内容不能为空。";
+                if(info.allowNull&&ret.length === 0)return null; //在这里直接抛出了。
+            }
+            var num = parseFloat(ret);
+            if(isNaN(num))throw "内容不是合法的数字。";
+            if(info){
+                if(info.allowFloat===false&&(!Number.isInteger(num))) throw "数值必须为整数。";
+                if(isFinite(info.min)&&num<info.min) throw "数值低于允许的最小值" + info.min + "。";
+                if(isFinite(info.max)&&num>info.max) throw "数值高于允许的最大值" + info.max + "。";
+            }
+            return num;
+        },
+        set: function (info, readEle, writeEle, value) {
+            if(readEle)readEle.text(value);
+            if(writeEle)writeEle.find(".form-control").val(value);
+        }
+    },
+    mapping: {
+        init: function (info) {
+            if(!("map" in info))info["map"] = {};
+            if(!("allowNull" in info))info["allowNull"] = false;
+        },
+        read: function (info) {
+            return $('<label></label>');
+        },
+        write: function (info) {
+            var ret = $('<select class="form-control"></select>');
+            for(var i in info.map) {
+                ret.append($('<option></option>').text(info.map[i].header));
+            }
+            return ret;
+        },
+        get: function (info, ele) {
+            var retIndex = ele[0].selectedIndex;
+            if((!info.allowNull)&&isNaN(retIndex))throw "选择的内容不能为空。";
+            return info.map[retIndex].value;
+        },
+        set: function (info, readEle, writeEle, value) {
+            for(var i in info.map) if (info.map[i].value === value) {
+                writeEle[0].selectedIndex = i;
+                readEle.text(info.map[i].header);
+                return;
+            }
+            writeEle[0].selectedIndex = -1;
+            readEle.text("");
+        }
     }
-    //TODO 做更多的预定义类型
 };
 var default_detail_field_elements = "text";
 /** typeInfo文档：
@@ -897,6 +1038,33 @@ var default_detail_field_elements = "text";
  *      format: string = "yyyy-mm-dd hh:ii:ss" 默认的日期展示格式。
  *      view: string = 'minute' 可以展示的时间范围。可选[minute|hour|day|month|year]。
  *      defaultView: string = 'month' 默认展示的时间范围。
+ *  }
+ *  number: { //default: number
+ *      placeholder: string = undefined
+ *      arrowButton: bool = false 添加工具按钮。
+ *      narrow: bool = false 把框变成窄框并内容居中。
+ *
+ *      allowBlank: bool = true 是否允许空。
+ *      allowNull: bool = false 是否允许为null。这将在内容为空时返回null。
+ *      min: number = undefined 最小值。
+ *      max: number = undefined 最大值。
+ *      allowFloat: bool = true 允许浮点数。
+ *  }
+ *  mapping: {
+ *      map: json = [{header: <string>, value: <string>}] 映射的内容。
+ *
+ *      allowNull: bool = false 是否允许不选择项。如果有默认值，这一条是不会达成的。
+ *  }
+ *  foreignChoice: {
+ *      allowNull: bool = false 在单值的情况下，是否允许空值出现。
+ *      many: bool = false 允许多值。
+ *      allowForeign: bool = true 启用外部列表回调。
+ *      allowCustom: bool = true 启用自定义面板。
+ *      foreignRequest: function(function(json)) 回调函数，直接调用此函数取得默认列表参数。要求不直接返回值，而是通过传入的回调函数参数返回。
+ *      foreignHeader: function(json) 用于生成在select内展示的标题。
+ *      foreignValue: function(json) 用于生成准备提交的数据。
+ *      customContent: [{}] 自定义项的子项。内容可以填写与CRAETE面板其他组件相同的结构。
+ *      showContent: function(json) 生成read模式下展示用的内容。
  *  }
  */
 
