@@ -6,7 +6,10 @@
     <link href="/BangumiNote/web/static/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="/BangumiNote/web/static/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="/BangumiNote/web/static/datetimepicker/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="/BangumiNote/web/static/css/tooltip.css">
     <script src="/BangumiNote/web/static/jQuery/jquery-3.3.1.min.js"></script>
+    <script src="/BangumiNote/web/static/bootstrap/js/umd/popper.min.js"></script>
+    <script src="/BangumiNote/web/static/bootstrap/js/umd/tooltip.min.js"></script>
     <script src="/BangumiNote/web/static/bootstrap/js/bootstrap.min.js"></script>
     <script src="/BangumiNote/web/static/rest-framework/tools.js"></script>
     <script src="/BangumiNote/web/static/rest-framework/list.js"></script>
@@ -53,13 +56,6 @@
         </li>
     </ul>
 </nav>
-<!--<div class="container">-->
-    <!--<div class="row m-2" id="nav-bar"></div>-->
-    <!--<div class="row p-5 bg-light">-->
-        <!--&lt;!&ndash; REST面板 &ndash;&gt;-->
-        <!--<div class="col" id="api-panel"></div>-->
-    <!--</div>-->
-<!--</div>-->
 <div class="container">
     <div class="row m-2">
         <div class="col-md-2"></div>
@@ -76,6 +72,45 @@
         </div>
         <div class="col-md-2"></div>
     </div>
+    <div class="row">
+        <div class="col-md-2 pr-2 pt-2">
+
+        </div>
+        <div class="col p-5 bg-light">
+            <div class="row">
+                <div class="col-3">TEST</div>
+                <div class="col-9">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#foreign">已有项</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#custom1">新建项1</a>
+                        </li>
+                        <li class="nav-item">
+                            <button class="btn btn-success btn-sm ml-2 mr-2"><i class="fa fa-plus"></i></button>
+                        </li>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div id="foreign" class="container tab-pane active"><br>
+                            <select multiple id="test-select" class="form-control">
+                                <option value="0">test0</option>
+                                <option value="1">test1</option>
+                                <option value="2">test2</option>
+                                <option value="3">test3</option>
+                            </select>
+                        </div>
+                        <div id="custom1" class="container tab-pane fade"><br>
+                            CREATE NEW
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
 </div>
 <div class="container-fluid">
     <div class="row mt-5">
@@ -86,9 +121,18 @@
 </div>
 </body>
 <script>
-
-    var rest = restful.newdetail({url: "/api/content/series"});
+    var datas = {
+        content: [
+            {id: 1, uid: 1, name: "魔法禁书目录", origin_name: "touaru", other_name: "十万本小黄书", type: "novel", keyword: "Index", series: {id: 1, name: "魔禁系列"}, author:[{name: "镰池河马"}]},
+            {id: 2, uid: 2, name: "刀剑神域", origin_name: "SAO", other_name: null, type: "novel", keyword: "SAP ALO GGO", series: {id: 2, name: "刀剑系列"}, author:[{name: "？？？"}]},
+            {id: 3, uid: 3, name: "罪恶王冠", origin_name: "Guilty Crown", other_name: "GC", type: "origin", keyword: "最二网管", series: null, author:[]}
+        ],
+        index: 0,
+        count: 3
+    };
     $(document).ready(function () {
+        var select = $("#test-select");
+
         build_navlist($("#nav-list"), [
             {title: "系列", link: "/web/data/series"},
             {title: "作者", link: "/web/data/authors"},
@@ -99,16 +143,43 @@
             {title: "数据库", link: "/web/data"},
             {title: "系列", link: "/web/data/series"}
         ]);
+        var typeMapping = [
+            {header: "小说", value: "novel"},
+            {header: "漫画", value: "comic"},
+            {header: "游戏", value: "game"},
+            {header: "原创", value: "origin"},
+            {header: "其他", value: "other"}
+        ];
         build_detail($("#api-panel")).info({
-            title: "系列",
-            deleteUrl: "/web/data/series",
-            defaultPanel: "panel",
+            title: "番组",
             content: [
-                {header: "ID", field: "id", type: "text", writable: false},
-                {header: "名称", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}},
-                {header: "时间", field: "date", type: "datetime", typeInfo: {format: "yyyy年mm月dd日", view: 'day'}, defaultValue: new Date("2018/12/3 4:09:55")}
+                {header: "ID", field: "uid", type: "text", writable: false},
+                {header: "名称", field: "name", type: "text", typeInfo: {length: 128, allowBlank: false}},
+                "hr",
+                {header: "原名", field: "origin_name", type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
+                {header: "其他名", field: "other_name", type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
+                "hr",
+                {header: "原作", field: "type", type: "mapping", typeInfo: {map: typeMapping}},
+                "collapse:主观评价",
+                {header: "喜爱度", field: "score_like", type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "耐看度", field: "score_patient", type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
+                "collapse:制作评价",
+                {header: "制作", field: "make_make", type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "剧本", field: "make_drama", type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "音乐", field: "make_music", type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "人物", field: "make_person", type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "背景", field: "make_background", type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
+                "collapse:限制级评级",
+                {header: "R18 评级", field: "level_r18", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "R18G评级", field: "level_r18g", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                "end",
+                "hr",
+                {header: "条目创建时间", field: "create_time", type: "datetime", writable: false},
+                {header: "最后修改时间", field: "update_time", type: "datetime", writable: false}
             ]
-        }).rest(rest)
+        }).dataGet(function () {
+            return  {id: 1, uid: 1, name: "魔法禁书目录", origin_name: "touaru", other_name: "十万本小黄书", type: "origin", keyword: "Index", series: {id: 1, name: "魔禁系列"}, author:[{name: "镰池河马"}]}
+        }).load();
     })
 </script>
 </html>
