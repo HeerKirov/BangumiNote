@@ -4,6 +4,8 @@ import com.heerkirov.bangumi.controller.base.HtmlController
 import com.heerkirov.bangumi.controller.ktml.data.DataNavView
 import com.heerkirov.bangumi.controller.ktml.data.series.*
 import com.heerkirov.bangumi.controller.ktml.data.author.*
+import com.heerkirov.bangumi.controller.ktml.data.company.*
+import com.heerkirov.bangumi.controller.ktml.data.anime.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
@@ -21,11 +23,29 @@ class DataController : HtmlController() {
     @RequestMapping("/authors/create") fun authorCreate() = servlet(AuthorCreateView::class)
     @RequestMapping("/authors/info/{id}") fun authorInfo(@PathVariable id: Int) = servlet(AuthorDetailView::class, hashMapOf<String, Any?>("id" to id))
 
+    @RequestMapping("/companies") fun companyList() = servlet(CompanyListView::class)
+    @RequestMapping("/companies/create") fun companyCreate() = servlet(CompanyCreateView::class)
+    @RequestMapping("/companies/info/{id}") fun companyInfo(@PathVariable id: Int) = servlet(CompanyDetailView::class, hashMapOf<String, Any?>("id" to id))
+
+    @RequestMapping("/animes") fun animeList() = servlet(AnimeListView::class)
+    @RequestMapping("/animes/create") fun animeCreate() = servlet(AnimeCreateView::class)
+    @RequestMapping("/animes/info/{id}") fun animeInfo(@PathVariable id: Int) = servlet(AnimeDetailView::class, hashMapOf<String, Any?>("id" to id))
+
     @Autowired val dataNavView: DataNavView? = null
+
     @Autowired val seriesListView: SeriesListView? = null
     @Autowired val seriesCreateView: SeriesCreateView? = null
     @Autowired val seriesDetailView: SeriesDetailView? = null
+
     @Autowired val authorListView: AuthorListView? = null
     @Autowired val authorCreateView: AuthorCreateView? = null
     @Autowired val authorDetailView: AuthorDetailView? = null
+
+    @Autowired val companyListView: CompanyListView? = null
+    @Autowired val companyCreateView: CompanyCreateView? = null
+    @Autowired val companyDetailView: CompanyDetailView? = null
+
+    @Autowired val animeListView: AnimeListView? = null
+    @Autowired val animeCreateView: AnimeCreateView? = null
+    @Autowired val animeDetailView: AnimeDetailView? = null
 }

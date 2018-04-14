@@ -15,6 +15,8 @@ class Meta : HtmlTopView({doc(lang = "zh-cn") {
         link(href = "/static/bootstrap/css/bootstrap.min.css", rel = "stylesheet")
         link(href = "/static/font-awesome/css/font-awesome.min.css", rel = "stylesheet")
         script("/static/jQuery/jquery-3.3.1.min.js")
+        script("/static/bootstrap/js/umd/popper.min.js")
+        script("/static/bootstrap/js/umd/tooltip.min.js")
         script("/static/bootstrap/js/bootstrap.min.js")
         script("/static/rest-framework/tools.js")
         script("/static/rest-framework/core.js")
