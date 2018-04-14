@@ -25,8 +25,8 @@ class AuthorDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cl
                 {header: "ID", field: "uid", type: "text", writable: false},
                 {header: "名字", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}},
                 {header: "原名", field: "origin_name", type: "text", typeInfo: {length: 32, allowBlank: true, allowNull: true}},
-                {header: "创建时间", field: "create_time", type: "datetime", writable: false},
-                {header: "最后修改", field: "update_time", type: "datetime", writable: false}
+                {header: "条目创建时间", field: "create_time", type: "datetime", writable: false},
+                {header: "最后修改时间", field: "update_time", type: "datetime", writable: false}
             ]
         }).rest(rest).load();
     """.trimIndent()))

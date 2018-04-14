@@ -23,7 +23,7 @@ class SeriesListView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::clas
             content: [
                 {header: "ID", field: "uid", sortable: true, link: function (i) {return "${proxyURL("web_data_series_detail")}" + i.id}},
                 {header: "名称", field: "name", sortable: true, link: function (i) {return "${proxyURL("web_data_series_detail")}" + i.id}},
-                {header: "创建时间", field: "create_time", sortable: true, type: "datetime"}
+                {header: "条目创建时间", field: "create_time", sortable: true, type: "datetime"}
             ]
         }).rest(rest.request).build();
     """.trimIndent()))

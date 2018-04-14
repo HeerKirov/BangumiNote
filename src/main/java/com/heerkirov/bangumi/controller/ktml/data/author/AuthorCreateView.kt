@@ -22,8 +22,8 @@ class AuthorCreateView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cl
             title: "作者",
             successUrl: "${proxyURL("web_data_author_list")}",
             content: [
-                {header: "名称", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}},
-                {header: "原名", field: "origin_name", type: "text", typeInfo: {length: 32, allowBlank: true, allowNull: true}}
+                {header: "名字", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}},
+                {header: "原名", field: "origin_name", optionFlag: true, type: "text", typeInfo: {length: 32, allowBlank: true, allowNull: true}}
             ]
         }).rest(rest.request);
     """.trimIndent()))
