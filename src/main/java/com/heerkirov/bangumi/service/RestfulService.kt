@@ -36,7 +36,7 @@ interface RestfulService<T> where T: ModelInterface {
      * 2. 初始化createTime和updateTime。
      */
     fun<T: UBModel> initializeUBModel(obj: T, user: User, incClazz: KClass<T>): T {
-        obj.userBelong = user
+        obj.userBelong = user.id
         obj.userBelongId = user.incUid(incClazz)
         obj.createFieldTime = Calendar.getInstance()
         obj.updateFieldTime = Calendar.getInstance()
@@ -54,7 +54,7 @@ interface RestfulService<T> where T: ModelInterface {
             if(id != null) {
                 val model = this.query(clazz).where(Restrictions.eq(fieldPrimaryKey, id)).first()
                 if(model != null) {
-                    if(model.userBelong.id == user.id)obj.set(fieldName, model)
+                    if(model.userBelong == user.id)obj.set(fieldName, model)
                     else throw UserForbidden(clazz.simpleName!!, id.toString())
                 }
                 else throw ModelWithPrimaryKeyNotFound(clazz.simpleName!!, id.toString())
@@ -70,10 +70,11 @@ interface RestfulService<T> where T: ModelInterface {
      * 1. 如果字段值有id，就视作已经存在的model，查找这些id并依次检查存在性和user所属，然后加入Set。
      * 2. 如果字段值没有id，就视作新建的model，赋予初始化，然后加入Set。
      */
-    fun<T: UBModel> DatabaseMiddleware.mappingSetTreat(obj: ModelInterface, fieldName: String, clazz: KClass<T>, user: User, fieldPrimaryKey: String = "id") {
+    fun<T: UBModel> DatabaseMiddleware.mappingSetTreat(obj: ModelInterface, fieldName: String, clazz: KClass<T>, user: User, fieldPrimaryKey: String = "id", objPrimaryKey: String = "id") {
         val originList = obj.get<Set<T>>(fieldName)
         obj.set(fieldName, HashSet<T>())
-        this.update(obj)
+        val objId = obj.get<Int>(objPrimaryKey)
+        if(objId != null) this.update(obj) //只有已经存在的obj才会被提前刷新。
         val newList = HashSet<T>()
         if(originList != null) {
             for(origin in originList) {
@@ -81,7 +82,7 @@ interface RestfulService<T> where T: ModelInterface {
                 if(id != null) {//已经存在的
                     val model = this.query(clazz).where(Restrictions.eq(fieldPrimaryKey, id)).first()
                     if(model != null) {
-                        if(model.userBelong.id == user.id)newList.add(model)
+                        if(model.userBelong == user.id)newList.add(model)
                         else throw UserForbidden(clazz.simpleName!!, id.toString())
                     }else throw ModelWithPrimaryKeyNotFound(clazz.simpleName!!, id.toString())
                 }else {//需要新建的

@@ -29,7 +29,7 @@ class AnimeServiceImpl(@Autowired val dao: Dao): AnimeService {
     override fun create(obj: ServiceSet<Anime>, appendItem: Set<String>?): ServiceSet<Anime> {
         return dao.dao<ServiceSet<Anime>> {
             //添加UserBelong依赖并推进uid
-            val user = obj.obj.user!!
+            val user = this.query(User::class).where(Restrictions.eq("id", obj.obj.userBelong)).first()?:throw ModelWithPrimaryKeyNotFound("User", obj.obj.userBelong)
             obj.obj.userBelongId = user.incUid(Anime::class)
            //处理series的附加问题。
             mappingTreat(obj.obj, "series", Series::class, user)
@@ -48,7 +48,8 @@ class AnimeServiceImpl(@Autowired val dao: Dao): AnimeService {
     override fun update(obj: ServiceSet<Anime>, appendItem: Set<String>?): ServiceSet<Anime> {
         return dao.dao<ServiceSet<Anime>> {
             //获得User并检查是否非空。
-            val user = obj.obj.user!!
+            val user = this.query(User::class).where(Restrictions.eq("id", obj.obj.userBelong)).first()?:throw ModelWithPrimaryKeyNotFound("User", obj.obj.userBelong)
+            obj.obj.userBelongId = user.incUid(Anime::class)
             mappingTreat(obj.obj, "series", Series::class, user)
             //mappingManyTreat(obj.obj, "authorList", Author::class, user, AuthorToAnime::class, "animeId", "authorId")
             mappingSetTreat(obj.obj, "authorList", Author::class, user)

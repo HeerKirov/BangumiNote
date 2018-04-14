@@ -15,11 +15,9 @@ import org.springframework.stereotype.Service
 class SeriesServiceImpl(@Autowired private val dao: Dao) : SeriesService {
     override fun create(obj: ServiceSet<Series>, appendItem: Set<String>?): ServiceSet<Series> {
         return dao.dao<ServiceSet<Series>> {
-            val user = obj.obj.user
-            if(user!=null){
-                obj.obj.userBelongId = user.incUid(Series::class)
-                this.update(user) //提交user的更改。
-            }
+            val user = this.query(User::class).where(Restrictions.eq("id", obj.obj.userBelong)).first()?:throw ModelWithPrimaryKeyNotFound("User", obj.obj.userBelong)
+            obj.obj.userBelongId = user.incUid(Series::class)
+            this.update(user) //提交user的更改。
             this.create(obj.obj)
             ServiceSet(obj.obj)
         }
