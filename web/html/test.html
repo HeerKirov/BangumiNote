@@ -82,27 +82,27 @@
                 <div class="col-9">
                     <!-- Nav tabs -->
                     <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#foreign">已有项</a>
+                        <li id="item1" class="nav-item active" role="presentation">
+                            <a class="nav-link" data-toggle="tab" aria-controls="foreign" role="tab" href="#foreign">已有项</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#custom1">新建项1</a>
+                        <li id="item2" class="nav-item" role="presentation">
+                            <a class="nav-link" data-toggle="tab" aria-controls="custom1" role="tab" href="#custom1">新建项1</a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" role="presentation">
                             <button class="btn btn-success btn-sm ml-2 mr-2"><i class="fa fa-plus"></i></button>
                         </li>
                     </ul>
                     <!-- Tab panes -->
                     <div class="tab-content">
-                        <div id="foreign" class="container tab-pane active"><br>
+                        <div id="foreign" class="container tab-pane active" role="tabpanel"><br>
                             <select multiple id="test-select" class="form-control">
-                                <option value="0">test0</option>
-                                <option value="1">test1</option>
-                                <option value="2">test2</option>
-                                <option value="3">test3</option>
+                                <option id="0" value="0">test0</option>
+                                <option id="1" value="1">test1</option>
+                                <option id="2" value="2">test2</option>
+                                <option id="3" value="3">test3</option>
                             </select>
                         </div>
-                        <div id="custom1" class="container tab-pane fade"><br>
+                        <div id="custom1" class="container tab-pane fade" role="tabpanel"><br>
                             CREATE NEW
                         </div>
                     </div>
@@ -132,7 +132,8 @@
     };
     $(document).ready(function () {
         var select = $("#test-select");
-
+        select.find("#1").attr("selected", true);
+        select.find("#3").attr("selected", true);
         build_navlist($("#nav-list"), [
             {title: "系列", link: "/web/data/series"},
             {title: "作者", link: "/web/data/authors"},
@@ -150,9 +151,47 @@
             {header: "原创", value: "origin"},
             {header: "其他", value: "other"}
         ];
+        var series_type = {
+            allowNull: true,
+            foreignRequest: function(delegate) {
+                delegate([
+                        {id: 1, uid: 1, name: "魔禁系列"},
+                        {id: 2, uid: 2, name: "系列2"},
+                        {id: 3, uid: 3, name: "系列3"},
+                        {id: 4, uid: 4, name: "系列4"}
+                    ])
+            },
+            foreignHeader: function(json) { return "[" + json.uid + "] " + json.name },
+            foreignValue: function(json) { return json.id },
+            customContent: [
+                {header: "名称", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}}
+            ],
+            showContent: function (json) {
+                return json.name
+            }
+        };
+        var author_type = {
+            many: true,
+            foreignRequest: function(delegate) {
+                delegate([
+                        {id: 1, uid: 1, name: "镰池河马"},
+                        {id: 2, uid: 2, name: "川原砾"}
+                    ])
+            },
+            foreignHeader: function(json) { return "[" + json.uid + "] " + json.name },
+            foreignValue: function(json) { return json.id },
+            customContent: [
+                {header: "名字", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}},
+                {header: "原名", field: "origin_name", type: "text", typeInfo: {length: 32, allowBlank: true, allowNull: true}}
+            ],
+            showContent: function (json) {
+                return json.name
+            }
+        };
         build_detail($("#api-panel")).info({
             title: "番组",
             content: [
+                {header: "跳转", field: null, type: "constLink", typeInfo: {text: "跃迁到高位空间 >>", link: function(json){return "/"+json.id}}},
                 {header: "ID", field: "uid", type: "text", writable: false},
                 {header: "名称", field: "name", type: "text", typeInfo: {length: 128, allowBlank: false}},
                 "hr",
@@ -160,6 +199,8 @@
                 {header: "其他名", field: "other_name", type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
                 "hr",
                 {header: "原作", field: "type", type: "mapping", typeInfo: {map: typeMapping}},
+                {header: "系列", field: "series", type: "foreignChoice", typeInfo: series_type},
+                {header: "作者", field: "author", type: "foreignChoice", typeInfo: author_type},
                 "collapse:主观评价",
                 {header: "喜爱度", field: "score_like", type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
                 {header: "耐看度", field: "score_patient", type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
@@ -178,7 +219,9 @@
                 {header: "最后修改时间", field: "update_time", type: "datetime", writable: false}
             ]
         }).dataGet(function () {
-            return  {id: 1, uid: 1, name: "魔法禁书目录", origin_name: "touaru", other_name: "十万本小黄书", type: "origin", keyword: "Index", series: {id: 1, name: "魔禁系列"}, author:[{name: "镰池河马"}]}
+            return  {id: 1, uid: 1, name: "魔法禁书目录", origin_name: "touaru", other_name: "十万本小黄书", type: "origin", keyword: "Index", series: {id: 1, name: "魔禁系列"}, author:[{id: 1, name: "镰池河马"}]}
+        }).dataUpdate(function (data) {
+            console.log(JSON.stringify(data, null, 4))
         }).load();
     })
 </script>
