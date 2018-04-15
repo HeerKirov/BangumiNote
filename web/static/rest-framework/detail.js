@@ -141,7 +141,7 @@ function build_detail(obj) {
         if(isfree()){
             run();
             var field = _info.content[index];
-            if(field instanceof  Object) {
+            if(field instanceof Object) {
                 clear_err_message(index);
                 set_field_state(index, "loading");
                 var result = collect_and_check(index);
@@ -152,7 +152,7 @@ function build_detail(obj) {
                         _rest_com["update"](result_json, true, function (success, status, json) {
                             if(success){
                                 //提交成功之后会修改展示的值。
-                                if(field.field in json)set_value(index, json[field.field]);
+                                if(field.field in json)set_and_refresh_value(index, field.field===null?json:json[field.field], result_json[field.field]);
                                 set_field_state(index, "show");
                             }else{
                                 clear_all_err_message();
@@ -163,7 +163,7 @@ function build_detail(obj) {
                         })
                     }else if(_data_set!==null&&$.isFunction(_data_set)) {
                         _data_set(result_json);
-                        set_value(index, result);
+                        set_and_refresh_value(index, result, result);
                         set_field_state(index, "show");
                         free();
                     }else{throw "No useful delegate function or component."}
@@ -185,7 +185,7 @@ function build_detail(obj) {
                     _rest_com["update"](result, false, function (success, status, json) {
                         if(success){
                             //提交成功之后会修改展示的值。
-                            set_all_value(json);
+                            set_and_refresh_all_value(json, result);
                             //并尝试进行网页跳转。
                             if(_info.updateUrl!==null){
                                 if($.isFunction(_info.updateUrl))location.href = _info.updateUrl(json);
@@ -201,7 +201,7 @@ function build_detail(obj) {
                     })
                 }else if(_data_set!==null&&$.isFunction(_data_set)) {
                     _data_set(result);
-                    set_all_value(result);
+                    set_and_refresh_all_value(result, result);
                     set_all_field_state("show");
                     //尝试进行网页跳转。
                     if(_info.updateUrl!==null){
@@ -248,7 +248,7 @@ function build_detail(obj) {
             _rest_com["retrieve"](function (success, status, json) {
                 if(success) {
                     //成功获取数据。
-                    set_all_value(json);
+                    set_and_refresh_all_value(json, null);
                     set_panel("panel");
                 }else{
                     set_loading_error(status, json);
@@ -257,7 +257,7 @@ function build_detail(obj) {
             })
         }else{
             var json = _data_get();
-            set_all_value(json);
+            set_and_refresh_all_value(json, null);
             set_panel("panel");
         }
     };
@@ -514,10 +514,11 @@ function build_detail(obj) {
             }
         }
     };
-    var set_value = function (index, value) {
+    var set_and_refresh_value = function (index, value, origin_value) {
         var set = _table_set[index];
         var field = _info.content[index];
         if(field instanceof Object) {
+            refresh_detail_field(field, set.read_ele, set.write_ele, origin_value);
             set_detail_field_value(field, set.read_ele, set.write_ele, value);
         }
     };
@@ -602,13 +603,15 @@ function build_detail(obj) {
         }
         return json;
     };
-    var set_all_value = function (json) {
+    var set_and_refresh_all_value = function (json, origin_json) {
         for(var i in _info.content) {
             var field = _info.content[i];
             if(field instanceof Object) {
                 var set = _table_set[i];
-                var value = json[field.field];
+                var origin_value = (origin_json)?origin_json[field.field]:undefined;
+                var value = field.field===null?json:json[field.field];
                 if(value!==undefined) {
+                    refresh_detail_field(field, set.read_ele, set.write_ele, origin_value);
                     set_detail_field_value(field, set.read_ele, set.write_ele, value);
                 }
             }
@@ -774,10 +777,18 @@ function get_detail_field_value(field, ele) {
     return value;
 }
 function set_detail_field_value(field, readEle, writeEle, value) {
+    console.log("set " + field.field);
     //这个函数会为field的ele赋值.为read组件和write组件同时赋值。如果存在不可读或不可写，对应的组件引用会为null。
     if(field instanceof Object &&(field.readable||field.writable)) {
         if (field.type === null) detail_fields[default_detail_field_elements]["set"](field.typeInfo, readEle, writeEle, value);
         else if (field.type in detail_fields) detail_fields[field.type]["set"](field.typeInfo, readEle, writeEle, value);
+    }
+}
+function refresh_detail_field(field, readEle, writeEle, origin_value) {
+    if(field instanceof Object) {
+        var f = (field.type === null)? detail_fields[default_detail_field_elements]["refresh"] :
+            (field.type in detail_fields)? detail_fields[field.type]["refresh"] : undefined;
+        if($.isFunction(f))f(field.typeInfo, readEle, writeEle, origin_value);
     }
 }
 function is_detail_field_read_only(type) {
@@ -797,6 +808,7 @@ function is_detail_field_read_only(type) {
  *      get: function(typeInfo, ele) 从修改控件中取值
  *      set: function(typeInfo, readEle, writeEle, value) 修改控件显示的值
  *      readOnly: bool = false 只读控件。该控件默认是不可写的。此属性会在构造默认值时就被偷偷修改。这些控件不需要write|get方法。
+ *      refresh: function(typeInfo, readEle, writeEle, origin_value) 在每次提交成功之后，会试图执行一次刷新函数。value是提交时的数据。
  * }
  */
 var detail_fields = {
@@ -1014,6 +1026,364 @@ var detail_fields = {
             writeEle[0].selectedIndex = -1;
             readEle.text("");
         }
+    },
+    foreignChoice: {
+        _index: 0,
+        init: function (info) {
+            if(!("many" in info))info["many"] = false;
+            if(!("link" in info))info["link"] = null;
+            if(!("allowForeign" in info))info["allowForeign"] = true;
+            if(!("allowCustom" in info))info["allowCustom"] = true;
+            if(!("allowNull" in info))info["allowNull"] = false;
+            if(!("showContent" in info))info["showContent"] = null;
+            if(!("isValueContent" in info))info["isValueContent"] = function (json, goal) {
+                if(json instanceof Object && goal instanceof Object && ("id" in json) && ("id" in goal))return json.id === goal.id;
+                else return json === goal;
+            };
+            if(!("isNewValue" in info))info["isNewValue"] = function (value) {
+                return (value instanceof Object)
+            };
+            if(info.allowForeign) {
+                if(!("foreignRequest" in info))throw "Param 'foreignRequest' is necessary.";
+                if(!("foreignHeader" in info))throw "Param 'foreignHeader' is necessary.";
+                if(!("foreignValue" in info))throw "Param 'foreignValue' is necessary.";
+            }
+            if(info.allowCustom) {
+                if(!("customContent" in info))throw "Param 'customContent' is necessary.";
+                else {
+                    for(var i in info.customContent) {
+                        var field = info.customContent[i];
+                        if(field instanceof Object) {
+                            if(!("type" in field))field["type"] = null;
+                            if(!("typeInfo" in field))field["typeInfo"] = {};
+                            if(!("validate" in field))field["validate"] = null;
+                            if(!("readable" in field))field["readable"] = true;
+                            if(!("writable" in field))field["writable"] = true;
+                            if(!("partialWrite" in field))field["partialWrite"] = true;
+                            if(!("defaultValue" in field))field["defaultValue"] = null;
+                            if(!("defaultState" in field))field["defaultState"] = null;
+                            initialization_detail_field_info(field);
+                            if(is_detail_field_read_only(field.type)){
+                                field.readable = true;
+                                field.writable = false;
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        read: function (info) {
+            return $('<div></div>');
+        },
+        write: function (info) {
+            //功能函数。
+            var refresh_panel_state = function () {
+                //在执行完面板变动之后，刷新面板和选项卡按钮的显示状态。
+                info.tab_bar.html("");
+                var any_exists = false;
+                if(info.allowForeign)info.tab_bar.append(info.tab_bar_btn_select);
+                for(var i in info.tab_bar_btn_customs) if(info.tab_bar_btn_customs[i] !== null){
+                    any_exists = true;
+                    info.tab_bar.append(info.tab_bar_btn_customs[i]);
+                }
+                if(info.many||!any_exists)info.tab_bar.append(info.tab_bar_btn_add.click(add_button_click));
+                info.tab_panel.html("");
+                if(info.allowForeign)info.tab_panel.append(info.tab_panel_select);
+                for(i in info.tab_panel_customs) if(info.tab_panel_customs[i] !== null){
+                    info.tab_panel.append(info.tab_panel_customs[i]);
+                    info.tab_panel_customs[i].find("#del-btn").click(get_del_button_click(i));
+                }
+            };
+            var get_del_button_click = function (index) {
+                return function () {
+                    if(index>=0 && index<info.custom_count) {
+                        info.tab_bar_btn_customs[index] = null;
+                        info.tab_panel_customs[index] = null;
+                        info.tab_panel_custom_eles[index] = null;
+                        refresh_panel_state();
+                    }
+                };
+            };
+            var del_all_panel = function () {
+                for(var i = 0; i < info.custom_count; ++i) {
+                    info.tab_bar_btn_customs[i] = null;
+                    info.tab_panel_customs[i] = null;
+                    info.tab_panel_custom_eles[i] = null;
+                }
+                refresh_panel_state();
+            };
+            var add_button_click = function() {
+                //按下add按钮，添加新的custom面板。
+                var tab_bar_btn = $('<li class="nav-item"></li>')
+                    .append($('<a class="nav-link" data-toggle="tab"></a>')
+                        .text("新建项" + (info.custom_count + 1))
+                        .attr("href", "#foreign-choice-" + info.index + "-custom-" + info.custom_count));
+                info.tab_bar_btn_customs[info.custom_count] = tab_bar_btn;
+                var tab_bar_panel = $('<div class="container tab-pane p-3 border rounded-bottom"></div>').attr("id", "foreign-choice-" + info.index + "-custom-" + info.custom_count);
+                //构造自定义面板的内容并记录
+                var eles = [];
+                var tbody = $('<div class="col"></div>');
+                for(var i in info.customContent) {
+                    var field = info.customContent[i];
+                    if(field instanceof Object) {
+                        var header = $('<label></label>').text(field.header);
+                        var tdcontent = build_create_field(field);
+                        eles[i] = tdcontent;
+                        var field_ele = $('<div class="row mt-1 mb-1"></div>')
+                            .append($('<div class="col-lg-2 col-md-3 col-xs-12"></div>')
+                                .append(header))
+                            .append($('<div class="col-lg-10 col-md-9"></div>')
+                                .append(tdcontent));
+                        tbody.append(field_ele);
+                    }//TODO else string
+                }
+                var del_button = $('<button id="del-btn" class="btn btn-danger"></button>')
+                    .append("删除 ")
+                    .append($('<i class="fa fa-trash"></i>'));
+
+                tab_bar_panel.append($('<div class="row p-1"></div>')
+                    .append(tbody));
+                tab_bar_panel.append($('<div class="row pt-1"></div>')
+                    .append($('<div class="col"></div>'))
+                    .append($('<div class="col-auto"></div>')
+                        .append(del_button)));
+                info.tab_panel_custom_eles[info.custom_count] = eles;
+                info.tab_panel_customs[info.custom_count] = tab_bar_panel;
+                info.custom_count ++;
+                refresh_panel_state();
+            };
+            //真正的build的业务逻辑。
+            info["index"] = ++this._index;
+            info["custom_count"] = 0;
+            info["tab_bar_btn_customs"] = [];
+            info["tab_panel_customs"] = [];
+            info["tab_panel_custom_eles"] = [];
+            //有关请求的线程限制参数。
+            info["request_refresh"] = function () {
+                //使控件刷新其持有的数据列表。
+                del_all_panel();
+                info.request_running = true;
+                info.foreignRequest(function (data) {
+                    info.select_box.html("");
+                    for(var i in data) {
+                        var header_text = info.foreignHeader(data[i]);
+                        var option = $('<option></option>').attr("id", i).attr("value", i).text(header_text);
+                        info.select_box.append(option);
+                    }
+                    info.select_box[0].selectedIndex = -1;
+                    info.select_data = data;
+                    info.request_running = false;
+                    if(info.request_write_waiting !== null) {
+                        info.write_set(info.request_write_waiting.writeEle, info.request_write_waiting.value);
+                        info.request_write_waiting = null;
+                    }
+                });
+            };
+            info["request_write"] = function(writeEle, value) {
+                //在线程安全的情况下提交一组对write的修改。
+                //内容会等待，直到request running任务结束才会执行。
+                if(info.request_running) {
+                    info.request_write_waiting = {writeEle: writeEle, value: value};
+                }else{
+                    info.write_set(writeEle, value);
+                }
+            };
+            info["request_write_waiting"] = null; //内部参数。如果write提交遇到了阻塞，会放在这里面等待完成。
+            info["request_running"] = false; //这个参数给set看的，让它知道当前是否在执行内容刷新任务。
+            info["write_set"] = function (writeEle, value) {
+                //立刻修改write组件展示的内容。不建议直接调用，建议由refresh函数和submit函数来调用。
+                if(info.many) {
+                    info.select_box[0].selectedIndex = -1;
+                    for(var k in value) {
+                        for(i in info.select_data) {
+                            if(info.isValueContent(value[k], info.select_data[i])) {
+                                info.select_box.find("#" + i).attr("selected", true);
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    //为了找出哪一个select项是配对项，需要做一个遍历。
+                    info.select_box[0].selectedIndex = -1;
+                    for(i in info.select_data) {
+                        if(info.isValueContent(value, info.select_data[i])) {
+                            info.select_box[0].selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            };
+            var all_panel = $('<div class="col"></div>');
+            if(info.allowForeign) {
+                //构造select控件。
+                info["select_box"] = $('<select class="form-control"></select>');
+                info["select_data"] = null;
+                if(info.many)info.select_box.attr("multiple", true);
+                //请求数据源。这里的代码和request_refresh不太一样。
+                info.request_running = true;
+                info.foreignRequest(function (data) {
+                    for(var i in data) {
+                        var header_text = info.foreignHeader(data[i]);
+                        var option = $('<option></option>').attr("id", i).attr("value", i).text(header_text);
+                        info.select_box.append(option);
+                    }
+                    info.select_box[0].selectedIndex = -1;
+                    info.select_data = data;
+                    info.request_running = false;
+                    if(info.request_write_waiting !== null) {
+                        info.write_set(info.request_write_waiting.writeEle, info.request_write_waiting.value);
+                        info.request_write_waiting = null;
+                    }
+                });
+            }else{
+                info["select_box"] = null;
+            }
+            if(info.allowCustom) {
+                //只有允许自定义时，才会显示tab。如果没有自定义，只剩一个select，是没必要构造一堆额外的东西的。
+                //构造tab顶栏
+                var tab_bar = $('<ul class="nav nav-tabs" role="tablist"></ul>');
+                all_panel.append(tab_bar);
+                info["tab_bar"] = tab_bar;
+                //在允许Foreign时，添加SELECT的选项卡按钮
+                if(info.allowForeign) {
+                    info["tab_bar_btn_select"] = $('<li class="nav-item"></li>').append($('<a class="nav-link active" data-toggle="tab">已有项</a>').attr("href", "#foreign-choice-" + info.index + "-select"))
+                }
+                //添加ADD按钮。
+                info["tab_bar_btn_add"] = $('<li class="nav-item"></li>')
+                    .append($('<button class="btn btn-success btn-sm ml-2"></button>')
+                        .append($('<i class="fa fa-plus"></i>')));
+
+                //构造tab选项卡区域
+                var panel = $('<div class="tab-content"></div>');
+                all_panel.append(panel);
+                info["tab_panel"] = panel;
+                //在允许Foreign时，将SELECT选项卡加入，并添加select控件。
+                if(info.allowForeign) {
+                    var select_panel = $('<div class="container tab-pane active p-3 border rounded-bottom"></div>').attr("id", "foreign-choice-" + info.index + "-select");
+                    info["tab_panel_select"] = select_panel;
+                    select_panel.append(info.select_box);
+                }
+                refresh_panel_state();//初始化刷新。
+            }else{//在不允许自定义时，只展示select面板。
+                all_panel.append(info.select_box);
+            }
+            return $('<div class="row"></div>').append(all_panel);
+        },
+        get: function (info, ele) {
+            //准备提取值。
+            //首先把所有来自select的值和来自custom的值分别提取出来。
+            var value_select = [];
+            if(info.allowForeign) {
+                if(info.many) {
+                    var options = info.select_box.find("option:selected");
+                    for(var i = 0; i < options.length; ++i) {
+                        var index = options[i].value;
+                        value_select.push(info.foreignValue(info.select_data[index]));
+                    }
+                }else {
+                    index = info.select_box[0].selectedIndex;
+                    if(index >= 0) value_select.push(info.foreignValue(info.select_data[index]));
+                }
+            }
+            //提取来自custom的值。提取时，仍然会执行validate检查。
+            var value_custom = [];
+            if(info.allowCustom) {
+                for(i in info.tab_panel_custom_eles) {
+                    var eles = info.tab_panel_custom_eles[i];
+                    if(eles != null) {
+                        var json = {};
+                        var err = "";
+                        var err_happend = false;
+                        for(var j in info.customContent) {
+                            var field = info.customContent[j];
+                            if(field instanceof Object) {
+                                try {
+                                    json[field.field] = check_create_field(field, eles[j]);
+                                }catch(e){
+                                    if(!err_happend)err_happend = true;
+                                    else err += "\n";
+                                    err += field.header + ": " + e;
+                                }
+                            }
+                        }
+                        if(err_happend)throw err;
+                        else value_custom.push(json);
+                    }
+                }
+            }
+            //之后根据allow和many按照优先级准备返回。
+            if(info.many) {
+                return value_select.concat(value_custom);
+            }else{
+                //在单值返回的情况下，优先返回custom的值。
+                if(value_custom.length > 0) return value_custom[0];
+                else if(value_select.length > 0) return value_select[0];
+                else if(info.allowNull) return null;
+                else throw "此项的值不能为空。";
+            }
+        },
+        set: function (info, readEle, writeEle, value) {
+            //设置值有点麻烦。
+            if(info.many) {
+                //多值模式下，value应当是数组。
+                readEle.html("");
+                var first = true;
+                for(var i in value) {
+                    if(first)first = false;else readEle.append(", ");
+                    var str = (value[i] !== null) ? info.showContent(value[i]) : "";
+                    var link = null;
+                    if($.isFunction(info.link))link = info.link(value[i]);
+                    else if(info.link !== null)link = info.link;
+                    if(link !== null)readEle.append($('<a></a>').attr("href", link).text(str));
+                    else readEle.append(str);
+                }
+                readEle.append()
+            }else{
+                //单值模式下，value是一个单独的值。
+                readEle.html("");
+                str = (value !== null) ? info.showContent(value) : "";
+                link = null;
+                if($.isFunction(info.link))link = info.link(value);
+                else if(info.link !== null)link = info.link;
+                if(link !== null)readEle.append($('<a></a>').attr("href", link).text(str));
+                else readEle.append(str);
+            }
+            info.request_write(writeEle, value);
+        },
+        refresh: function (info, readEle, writeEle, origin_value) {
+            //为了节省资源，只在value中包含新建的资源时刷新。
+            if(info.allowForeign && origin_value) {
+                if(info.many) {
+                    for(var i in origin_value) {
+                        if(info.isNewValue(origin_value[i])) {
+                            info.request_refresh();
+                            break;
+                        }
+                    }
+                }else{
+                    if(info.isNewValue(origin_value)){
+                        info.request_refresh();
+                    }
+                }
+            }
+        }
+    },
+    constLink: {
+        init: function (info) {
+            if(!("text" in info))info["text"] = null;
+            if(!("link" in info))info["link"] = null;
+        },
+        read: function(info) {
+            var ret = $('<a></a>').text(info.text);
+            if(!$.isFunction(info.link)&&info.link!==null)ret.attr("href", info.link);
+            return ret;
+        },
+        set: function(info, readEle, writeEle, value) {
+            if($.isFunction(info.link)) {
+                readEle.attr("href", info.link(value))
+            }
+        },
+        readOnly: true
     }
 };
 var default_detail_field_elements = "text";
@@ -1063,8 +1433,15 @@ var default_detail_field_elements = "text";
  *      foreignRequest: function(function(json)) 回调函数，直接调用此函数取得默认列表参数。要求不直接返回值，而是通过传入的回调函数参数返回。
  *      foreignHeader: function(json) 用于生成在select内展示的标题。
  *      foreignValue: function(json) 用于生成准备提交的数据。
- *      customContent: [{}] 自定义项的子项。内容可以填写与CRAETE面板其他组件相同的结构。
+ *      customContent: [{}] 自定义项的子项。内容可以填写与CREATE面板其他组件相同的结构。
  *      showContent: function(json) 生成read模式下展示用的内容。
+ *      isValueContent: function(json, goal) 进行对比判断，判断传给write函数的某个json值是否与select列表中取得的值相等。默认的对比函数将对比二者的id，然后再比对二者自身。
+ *      isNewValue: function(value) 用在refresh中，判断一个数据是否是新建资源。默认判断其是否不是object。
+ *      link: string|function(json) = null 是否将read模式下的文本转换为链接。
+ *  }
+ *  constLink: {
+ *      text: string 展示的常值内容。
+ *      link: string|function(json) 构成的链接。如果链接是函数，会在每次刷新时重构一次。
  *  }
  */
 
