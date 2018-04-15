@@ -44,6 +44,8 @@
                 <value>com.heerkirov.bangumi.model.Author</value>
                 <value>com.heerkirov.bangumi.model.Company</value>
                 <value>com.heerkirov.bangumi.model.Anime</value>
+                <value>com.heerkirov.bangumi.model.Bangumi</value>
+                <value>com.heerkirov.bangumi.model.Tag</value>
                 <value>com.heerkirov.bangumi.model.AuthorToAnime</value>
             </list>
         </property>
