@@ -61,7 +61,7 @@ class AnimeCreateView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cla
                 {header: "系列", field: "series", optionFlag: true, type: "foreignChoice", typeInfo: series_type_info},
                 "hr",
                 {header: "作者", field: "author", optionFlag: true, type: "foreignChoice", typeInfo: author_type_info},
-                 {header: "原作", field: "type", type: "mapping", typeInfo: {map: typeMapping, defaultValue: "origin"}},
+                {header: "原作", field: "type", type: "mapping", typeInfo: {map: typeMapping, defaultValue: "origin"}},
                 {header: "关键字", field: "keyword", optionFlag: true, type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
                 "collapse:主观评价",
                 {header: "喜爱度", field: "score_like", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},

@@ -17,6 +17,38 @@ class AnimeDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cla
     {title: "详情", link: "#"}
     """.trimIndent()))
     impl("SCRIPT", text("""
+        var series_rest = restful.newlist({url: "${proxyURL("api_content_series")}"});
+        var author_rest = restful.newlist({url: "${proxyURL("api_content_author")}"});
+        var series_type = {
+            allowNull: true,
+            foreignRequest: function(delegate) { series_rest.request(null, function(success, status, data) { if(success)delegate(data.content) }) },
+            foreignHeader: function(json) { return "[" + json.uid + "] " + json.name },
+            foreignValue: function(json) { return json.id },
+            customContent: [
+                {header: "名称", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}}
+            ],
+            showContent: function (json) { return json.name },
+            link: function(json) { return "${proxyURL("web_data_series_detail")}" + json.id }
+        };
+        var author_type = {
+            many: true,
+            foreignRequest: function(delegate) { author_rest.request(null, function(success, status, data) { if(success)delegate(data.content) }) },
+            foreignHeader: function(json) { return "[" + json.uid + "] " + json.name },
+            foreignValue: function(json) { return json.id },
+            customContent: [
+                {header: "名字", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}},
+                {header: "原名", field: "origin_name", type: "text", typeInfo: {length: 32, allowBlank: true, allowNull: true}}
+            ],
+            showContent: function (json) { return json.name },
+            link: function(json) { return "${proxyURL("web_data_author_detail")}" + json.id }
+        };
+        var typeMapping = [
+            {header: "小说", value: "novel"},
+            {header: "漫画", value: "comic"},
+            {header: "游戏", value: "game"},
+            {header: "原创", value: "origin"},
+            {header: "其他", value: "other"}
+        ];
         var rest = restful.newdetail({url: "${proxyURL("api_content_anime_detail", "id" to attrSafe("id"))}"});
         build_detail(${'$'}("#api-panel")).info({
             title: "番组",
@@ -24,23 +56,28 @@ class AnimeDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cla
             content: [
                 {header: "ID", field: "uid", type: "text", writable: false},
                 {header: "名称", field: "name", type: "text", typeInfo: {length: 128, allowBlank: false}},
+                "hr",
                 {header: "原名", field: "origin_name", type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
                 {header: "其他名", field: "other_name", type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
-                {header: "原作类型", field: "type", type: "text", typeInfo: {length: 12, allowBlank: false}},
-
+                "hr",
+                {header: "系列", field: "series", type: "foreignChoice", typeInfo: series_type},
+                "hr",
+                {header: "作者", field: "author", type: "foreignChoice", typeInfo: author_type},
+                {header: "原作", field: "type", type: "mapping", typeInfo: {map: typeMapping}},
+                {header: "关键字", field: "keyword", type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
+                "collapse:主观评价",
                 {header: "喜爱度", field: "score_like", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 {header: "耐看度", field: "score_patient", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-
+                "collapse:制作评价",
                 {header: "制作", field: "make_make", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 {header: "剧本", field: "make_drama", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 {header: "音乐", field: "make_music", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 {header: "人物", field: "make_person", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 {header: "背景", field: "make_background", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-
+                "collapse:限制级评级",
                 {header: "R18 评级", field: "level_r18", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 {header: "R18G评级", field: "level_r18g", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-
-
+                "hr",
                 {header: "条目创建时间", field: "create_time", type: "datetime", writable: false},
                 {header: "最后修改时间", field: "update_time", type: "datetime", writable: false}
             ]
