@@ -24,6 +24,9 @@ class SeriesDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cl
             content: [
                 {header: "ID", field: "uid", type: "text", writable: false},
                 {header: "名称", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}},
+                "hr",
+                {header: "番组", field: null, type: "constLink", typeInfo: {text: "所有下属番组 >>", link: function(json){return "${proxyURL("web_data_anime_list")}?series_id__eq="+json.id}}},
+                "hr",
                 {header: "条目创建时间", field: "create_time", type: "datetime", writable: false},
                 {header: "最后修改时间", field: "update_time", type: "datetime", writable: false}
             ]

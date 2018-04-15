@@ -25,6 +25,7 @@ class CompanyDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::c
                 {header: "ID", field: "uid", type: "text", writable: false},
                 {header: "名称", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}},
                 {header: "原名", field: "origin_name", type: "text", typeInfo: {length: 32, allowBlank: true, allowNull: true}},
+                "hr",
                 {header: "条目创建时间", field: "create_time", type: "datetime", writable: false},
                 {header: "最后修改时间", field: "update_time", type: "datetime", writable: false}
             ]

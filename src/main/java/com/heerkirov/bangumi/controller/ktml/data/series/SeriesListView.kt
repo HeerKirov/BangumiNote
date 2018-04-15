@@ -20,10 +20,12 @@ class SeriesListView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::clas
         build_list(${'$'}("#api-panel")).info({
             title: "系列",
             createUrl: "${proxyURL("web_data_series_create")}",
+            visibleControl: true,
             content: [
                 {header: "ID", field: "uid", sortable: true, link: function (i) {return "${proxyURL("web_data_series_detail")}" + i.id}},
                 {header: "名称", field: "name", sortable: true, link: function (i) {return "${proxyURL("web_data_series_detail")}" + i.id}},
-                {header: "条目创建时间", field: "create_time", sortable: true, type: "datetime"}
+                {header: "条目创建时间", field: "create_time", sortable: true, type: "datetime"},
+                {header: "最后修改时间", field: "update_time", sortable: true, type: "datetime", visible: false}
             ]
         }).rest(rest.request).build();
     """.trimIndent()))

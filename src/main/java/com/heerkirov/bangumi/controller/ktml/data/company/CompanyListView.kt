@@ -19,11 +19,13 @@ class CompanyListView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cla
         build_list(${'$'}("#api-panel")).info({
             title: "制作公司",
             createUrl: "${proxyURL("web_data_company_create")}",
+            visibleControl: true,
             content: [
                 {header: "ID", field: "uid", sortable: true, link: function (i) {return "${proxyURL("web_data_company_detail")}" + i.id}},
                 {header: "名称", field: "name", sortable: true, link: function (i) {return "${proxyURL("web_data_company_detail")}" + i.id}},
                 {header: "原名", field: "origin_name", sortable: true},
-                {header: "条目创建时间", field: "create_time", sortable: true, type: "datetime"}
+                {header: "条目创建时间", field: "create_time", sortable: true, type: "datetime"},
+                {header: "最后修改时间", field: "update_time", sortable: true, type: "datetime", visible: false}
             ]
         }).rest(rest.request).build();
     """.trimIndent()))

@@ -25,6 +25,9 @@ class AuthorDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cl
                 {header: "ID", field: "uid", type: "text", writable: false},
                 {header: "名字", field: "name", type: "text", typeInfo: {length: 32, allowBlank: false}},
                 {header: "原名", field: "origin_name", type: "text", typeInfo: {length: 32, allowBlank: true, allowNull: true}},
+                "hr",
+                {header: "番组", field: null, type: "constLink", typeInfo: {text: "所有下属番组 >>", link: function(json) {return "${proxyURL("web_data_anime_list")}?author_id__eq="+json.id}}},
+                "hr",
                 {header: "条目创建时间", field: "create_time", type: "datetime", writable: false},
                 {header: "最后修改时间", field: "update_time", type: "datetime", writable: false}
             ]
