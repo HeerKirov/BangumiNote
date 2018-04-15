@@ -11,7 +11,7 @@
         <spring-version>4.3.14.RELEASE</spring-version>
         <fastjson-version>1.2.16</fastjson-version>
         <junit-version>4.12</junit-version>
-        <kotlin.version>1.2.30</kotlin.version>
+        <kotlin.version>1.2.31</kotlin.version>
         <druid.version>1.1.9</druid.version>
     </properties>
 
