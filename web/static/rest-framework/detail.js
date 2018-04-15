@@ -1152,6 +1152,9 @@ var detail_fields = {
                 info.custom_count ++;
                 refresh_panel_state();
             };
+            var clear_select_click = function() {
+                info.select_box[0].selectedIndex = -1;
+            };
             //真正的build的业务逻辑。
             info["index"] = ++this._index;
             info["custom_count"] = 0;
@@ -1235,6 +1238,28 @@ var detail_fields = {
                         info.request_write_waiting = null;
                     }
                 });
+                var select_panel = $('<div class="container tab-pane active p-3 border rounded-bottom"></div>').attr("id", "foreign-choice-" + info.index + "-select");
+                info["tab_panel_select"] = select_panel;
+                var select_clear_btn = $('<button class="btn"></button>')
+                    .append(info.many?"清空选择 ":null)
+                    .append($('<i class="fa fa-trash-o"></i>'))
+                    .click(clear_select_click);
+                if(info.many) {
+                    select_panel
+                        .append($('<div class="row p-1"></div>')
+                            .append($('<div class="col"></div>')
+                                .append(info.select_box)))
+                        .append($('<div class="row p-1"></div>')
+                            .append($('<div class="col"></div>'))
+                            .append($('<div class="col-auto"></div>')
+                                .append(select_clear_btn)))
+                }else{
+                    select_panel.append($('<div class="row p-1"></div>')
+                        .append($('<div class="col"></div>')
+                            .append(info.select_box))
+                        .append($('<div class="col-auto"></div>')
+                            .append(select_clear_btn)));
+                }
             }else{
                 info["select_box"] = null;
             }
@@ -1257,15 +1282,9 @@ var detail_fields = {
                 var panel = $('<div class="tab-content"></div>');
                 all_panel.append(panel);
                 info["tab_panel"] = panel;
-                //在允许Foreign时，将SELECT选项卡加入，并添加select控件。
-                if(info.allowForeign) {
-                    var select_panel = $('<div class="container tab-pane active p-3 border rounded-bottom"></div>').attr("id", "foreign-choice-" + info.index + "-select");
-                    info["tab_panel_select"] = select_panel;
-                    select_panel.append(info.select_box);
-                }
                 refresh_panel_state();//初始化刷新。
             }else{//在不允许自定义时，只展示select面板。
-                all_panel.append(info.select_box);
+                all_panel.append(info.tab_panel_select);
             }
             return $('<div class="row"></div>').append(all_panel);
         },
