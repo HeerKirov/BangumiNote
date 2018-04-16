@@ -47,7 +47,7 @@ interface RestfulService<T> where T: ModelInterface {
      * 2. 如果字段值有id，就视作添加已存在的model，并检查是否存在，且user所属是否合理。
      * 3. 如果没有id，视作新添加的model，按照常规流程赋予初始化，并保存。
      */
-    fun<T: UBModel> DatabaseMiddleware.mappingTreat(obj: ModelInterface, fieldName: String, clazz: KClass<T>, user: User, fieldPrimaryKey: String = "id", notNull: Boolean = false) {
+    fun<T: UBModel> DatabaseMiddleware.mappingTreat(obj: ModelInterface, fieldName: String, clazz: KClass<T>, user: User, fieldPrimaryKey: String = "id", notNull: Boolean = false, allowNew: Boolean = true) {
         val origin = obj.get<T>(fieldName)
         if(origin != null) {
             val id = origin.get<Int>(fieldPrimaryKey)
@@ -58,9 +58,11 @@ interface RestfulService<T> where T: ModelInterface {
                     else throw UserForbidden(clazz.simpleName!!, id.toString())
                 }
                 else throw ModelWithPrimaryKeyNotFound(clazz.simpleName!!, id.toString())
-            }else {
+            }else if(allowNew) {
                 initializeUBModel(origin, user, clazz)
                 this.create(origin)
+            }else{
+                throw NotAllowedNewModel(clazz.simpleName!!, fieldName)
             }
         }else if(notNull) throw NullValueError(fieldName)
     }

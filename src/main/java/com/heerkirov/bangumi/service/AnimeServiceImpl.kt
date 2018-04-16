@@ -36,8 +36,9 @@ class AnimeServiceImpl(@Autowired val dao: Dao): AnimeService {
             //处理author的附加问题。
             //mappingManyTreat(obj.obj, "authorList", Author::class, user, AuthorToAnime::class, "animeId", "authorId")
             mappingSetTreat(obj.obj, "authorList", Author::class, user)
+            //CREATE时不需要处理tagList。
             //构造主要内容，并获得主键。
-            val pkey = this.create(obj.obj) as Int
+            this.create(obj.obj)
             //最后提交对user的更改，因为中途会用到对user的修改。
             this.update(user)
             val ret = ServiceSet(obj.obj)
@@ -49,13 +50,12 @@ class AnimeServiceImpl(@Autowired val dao: Dao): AnimeService {
         return dao.dao<ServiceSet<Anime>> {
             //获得User并检查是否非空。
             val user = this.query(User::class).where(Restrictions.eq("id", obj.obj.userBelong)).first()?:throw ModelWithPrimaryKeyNotFound("User", obj.obj.userBelong)
-            obj.obj.userBelongId = user.incUid(Anime::class)
+            //obj.obj.userBelongId = user.incUid(Anime::class)
             mappingTreat(obj.obj, "series", Series::class, user)
             //mappingManyTreat(obj.obj, "authorList", Author::class, user, AuthorToAnime::class, "animeId", "authorId")
             mappingSetTreat(obj.obj, "authorList", Author::class, user)
-
+            mappingSetTreat(obj.obj, "tagList", Tag::class, user)
             this.update(obj.obj)
-            val pkey = obj.obj.id!!
             val ret = ServiceSet(obj.obj)
             ret
         }

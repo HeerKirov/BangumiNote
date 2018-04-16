@@ -81,7 +81,11 @@ class Anime constructor(
         @Column(name = "make_background")var makeBackground: Double? = null, //背景
 
         @Column(name = "level_r18")var levelR18: Double? = null, //R18评级
-        @Column(name = "level_r18g")var levelR18G: Double? = null //R18G评级
+        @Column(name = "level_r18g")var levelR18G: Double? = null, //R18G评级
+
+        @ManyToMany(targetEntity = Tag::class,  fetch = FetchType.EAGER)@JoinTable(name = "public.tag_to_anime",
+                joinColumns = [JoinColumn(name = "anime_id")],
+                inverseJoinColumns = [JoinColumn(name = "tag_id")]) var tagList: Set<Tag> = HashSet()
 ): UBModel()
 
 @Entity @Table(name = "public.bangumi")
@@ -104,8 +108,8 @@ class Bangumi(
 
         @Column(name = "finished_time")var finishedTime: Calendar? = null,
         @Column(name = "watching", nullable = false)var watching: Boolean = false,
-        @Column(name = "multiple_time", nullable = false)var multipleTimes: Boolean = false,
-        @Column(name = "seen_the_original", nullable = false)var SeenTheOriginal: Boolean = false,
+        @Column(name = "multiple_time", nullable = false)var multipleTime: Boolean = false,
+        @Column(name = "seen_the_original", nullable = false)var seenTheOriginal: Boolean = false,
 
         @Column(name = "user_id", nullable = false) var userId: String? = null,
         @Column(name = "create_time", nullable = false)var createTime: Calendar? = null,
@@ -133,6 +137,7 @@ class Episode (
         @Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="EPISODE_ID_SEQ")
         @SequenceGenerator(name="EPISODE_ID_SEQ", sequenceName="episode_id_seq", allocationSize = 1)
         @Column(name = "id")var id: Int? = null,
+        @Column(name = "uid", nullable = false)var uid: Int? = null,
         @ManyToOne@JoinColumn(name = "bangumi_id", nullable = false)var bangumi: Bangumi? = null,
         @Column(name = "serial", nullable = false)var serial: Int? = null,
         @Column(name = "name", nullable = false, length = 128)var name: String = "",
@@ -150,14 +155,15 @@ class Tag(
         @Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="TAG_ID_SEQ")
         @SequenceGenerator(name="TAG_ID_SEQ", sequenceName="tag_id_seq", allocationSize = 1)
         @Column(name = "id")var id: Int? = null,
+        @Column(name = "uid", nullable = false)var uid: Int? = null,
         @Column(name = "name", nullable = false, length = 8)var name: String = "",
         @Column(name = "description", nullable = false, length = 128)var description: String = "",
-        @Column(name = "parent")var parent: Int? = null,
+        @ManyToOne@JoinColumn(name = "parent")var parent: Tag? = null,
 
         @Column(name = "user_id", nullable = false) var userId: String? = null,
         @Column(name = "create_time", nullable = false)var createTime: Calendar? = null,
         @Column(name = "update_time", nullable = false)var updateTime: Calendar? = null
-)
+): UBModel()
 
 @Entity @Table(name = "public.author_to_anime")
 class AuthorToAnime(

@@ -22,3 +22,9 @@ interface AuthorService: RestfulService<Author>
 
 @Service
 interface AnimeService : RestfulService<Anime>
+
+@Service
+interface BangumiService: RestfulService<Bangumi>
+
+@Service
+interface TagService: RestfulService<Tag>

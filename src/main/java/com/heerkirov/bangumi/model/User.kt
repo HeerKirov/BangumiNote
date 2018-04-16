@@ -25,7 +25,6 @@ class User(
         @Column(name = "last_login", nullable = false)var lastLogin: Calendar? = null,
 
         @Column(name = "uid", nullable = false)@Type(type = "json")var uid: HashMap<String, Any?> = hashMapOf()
-        //TODO 一般是不会从UBMode获取user的，因此应该把这一套体系替换回user.id，节约查询资源。
 ): DTModel() {
     fun<T> incUid(model: KClass<T>): Int where T: UBModel {
         //该函数将提取目标uid，并自动在模型内将uid后推一位。
