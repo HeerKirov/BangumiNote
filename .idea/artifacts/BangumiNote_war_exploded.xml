@@ -53,6 +53,8 @@
           <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.2.31" />
           <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jre7:1.2.31" />
           <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.2.31" />
+          <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.31" />
+          <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.31" />
         </element>
       </element>
     </root>
