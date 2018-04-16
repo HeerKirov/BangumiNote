@@ -106,6 +106,17 @@ class Security(@Autowired private val session: HttpSession,
         }
     }
 
+    fun changePassword(oldPassword: String, newPassword: String): Boolean {
+        val user = currentUser()
+        if(user!=null&&user.password == oldPassword) {
+            user.password = newPassword
+            userService.update(ServiceSet(user))
+            return true
+        }else{
+            return false
+        }
+    }
+
     fun currentUser(): User? {
         val ba = session.getAttribute("basic") as User?
         if(ba!=null){

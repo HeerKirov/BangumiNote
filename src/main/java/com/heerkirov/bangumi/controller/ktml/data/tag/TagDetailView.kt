@@ -34,7 +34,7 @@ class TagDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::class
             content: [
                 {header: "ID", field: "uid", type: "text", writable: false},
                 {header: "标签", field: "name", type: "text", typeInfo: {length: 8, allowBlank: false}},
-                {header: "描述", field: "description", type: "text", typeInfo: {length: 128, allowBlank: true}},
+                {header: "描述", field: "description", type: "text", typeInfo: {length: 128, allowBlank: true, area: true}},
                 "hr",
                 {header: "父标签", field: "parent", type: "foreignChoice", typeInfo: tag_type},
                 {header: "子标签", field: null, type: "constLink", typeInfo: {text: "所有子标签 >>", link: function(json){return "${proxyURL("web_data_tag_list")}?parent__eq="+json.id}}},

@@ -798,6 +798,14 @@ var list_field_elements = {
         }
         var value = fmt_dt_json(origin_value, fmt);
         return (link===null)?$('<label></label>').text(value):$('<a></a>').attr("href", link(dataitem)).text(value);
+    },
+    bool: function(info, origin_value, link, dataitem) {
+        if(info) {
+            if(!("yesIcon" in info))info["yesIcon"] = true;
+            if(!("noIcon" in info))info["noIcon"] = false;
+        }
+        console.log("value=" + origin_value);
+        return $("<i></i>").attr("class", (origin_value===true&&info.yesIcon)?"fa fa-check":(origin_value===false&&info.noIcon)?"fa fa-times":"");
     }
 };
 var default_list_field_elements = "text";
@@ -814,6 +822,7 @@ var default_list_field_elements = "text";
  *      format: string = "yyyy-mm-dd hh:ii:ss" 展示的时间日期格式。按示例所示填写即可。
  * }
  * bool: {
- *
+ *      yesIcon: bool = true
+ *      noIcon: bool = false
  * }
  */

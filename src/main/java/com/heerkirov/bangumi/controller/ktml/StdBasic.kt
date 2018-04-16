@@ -38,7 +38,7 @@ class StdBasic : HtmlView(Meta::class, {
                         b(clazz = "caret")
                     }
                     ul(clazz = "dropdown-menu") {
-                        li {a_(clazz = "nav-link text-dark", href = "#"){"资料"}}
+                        li {a_(clazz = "nav-link text-dark", href = proxyURL("web_document")){"资料"}}
                         li {a_(clazz = "nav-link text-dark", href = "javascript:void(0)", onclick = "logout()"){"登出"}}
                     }
                 }

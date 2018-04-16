@@ -11,8 +11,7 @@
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
        http://www.springframework.org/schema/tx
-       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
-       ">
+       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
     <context:property-placeholder location="classpath:jdbc.properties" system-properties-mode="FALLBACK"/>
     <mvc:annotation-driven/>
     <mvc:resources mapping="/static/**" location="/static/"/>
@@ -45,13 +44,12 @@
                 <value>com.heerkirov.bangumi.model.Company</value>
                 <value>com.heerkirov.bangumi.model.Anime</value>
                 <value>com.heerkirov.bangumi.model.Bangumi</value>
+                <value>com.heerkirov.bangumi.model.Episode</value>
                 <value>com.heerkirov.bangumi.model.Tag</value>
-                <value>com.heerkirov.bangumi.model.AuthorToAnime</value>
             </list>
         </property>
     </bean>
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close" init-method="init">
-    <!--<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">-->
         <property name="url" value="jdbc:postgresql://${host}:${port}/${database}"/>
         <property name="username" value="${username}"/>
         <property name="password" value="${password}"/>
@@ -74,8 +72,4 @@
         <property name="poolPreparedStatements" value="false" />
         <property name="maxOpenPreparedStatements" value="50" />
     </bean>
-    <!--<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">-->
-        <!--<property name="sessionFactory" ref="sessionFactory"/>-->
-    <!--</bean>-->
-    <!--<tx:annotation-driven transaction-manager="transactionManager"/>-->
 </beans>

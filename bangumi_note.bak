@@ -1,0 +1,1149 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.6.6
+-- Dumped by pg_dump version 9.6.6
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: anime; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE anime (
+    id integer NOT NULL,
+    name character varying(128) NOT NULL,
+    origin_name character varying(128),
+    type character varying(12) NOT NULL,
+    keyword character varying(128),
+    series_id integer,
+    user_id character varying(16) NOT NULL,
+    uid integer NOT NULL,
+    create_time timestamp without time zone NOT NULL,
+    update_time timestamp without time zone NOT NULL,
+    score_like double precision,
+    score_patient double precision,
+    make_make double precision,
+    make_drama double precision,
+    make_music double precision,
+    make_person double precision,
+    make_background double precision,
+    level_r18 double precision,
+    level_r18g double precision,
+    other_name character varying(128)
+);
+
+
+ALTER TABLE anime OWNER TO heer;
+
+--
+-- Name: anime_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE anime_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE anime_id_seq OWNER TO heer;
+
+--
+-- Name: anime_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE anime_id_seq OWNED BY anime.id;
+
+
+--
+-- Name: author; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE author (
+    id integer NOT NULL,
+    name character varying(32) NOT NULL,
+    origin_name character varying(32),
+    user_id character varying(16) NOT NULL,
+    create_time timestamp without time zone DEFAULT now() NOT NULL,
+    update_time timestamp without time zone DEFAULT now() NOT NULL,
+    uid integer NOT NULL
+);
+
+
+ALTER TABLE author OWNER TO heer;
+
+--
+-- Name: author_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE author_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE author_id_seq OWNER TO heer;
+
+--
+-- Name: author_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE author_id_seq OWNED BY author.id;
+
+
+--
+-- Name: author_to_anime; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE author_to_anime (
+    id integer NOT NULL,
+    author_id integer NOT NULL,
+    anime_id integer NOT NULL
+);
+
+
+ALTER TABLE author_to_anime OWNER TO heer;
+
+--
+-- Name: author_to_anime_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE author_to_anime_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE author_to_anime_id_seq OWNER TO heer;
+
+--
+-- Name: author_to_anime_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE author_to_anime_id_seq OWNED BY author_to_anime.id;
+
+
+--
+-- Name: bangumi; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE bangumi (
+    id integer NOT NULL,
+    uid integer NOT NULL,
+    name character varying(128) NOT NULL,
+    serial integer NOT NULL,
+    anime_id integer NOT NULL,
+    publish_time timestamp without time zone,
+    play_type character varying(12) NOT NULL,
+    play_length integer,
+    play_quantity integer,
+    finished_time timestamp without time zone,
+    watching boolean NOT NULL,
+    multiple_time boolean NOT NULL,
+    seen_the_original boolean NOT NULL,
+    user_id character varying(16) NOT NULL,
+    create_time timestamp without time zone NOT NULL,
+    update_time timestamp without time zone NOT NULL,
+    score_like double precision,
+    score_patient double precision,
+    make_make double precision,
+    make_drama double precision,
+    make_music double precision,
+    make_person double precision,
+    make_background double precision,
+    level_r18 double precision,
+    level_r18g double precision
+);
+
+
+ALTER TABLE bangumi OWNER TO heer;
+
+--
+-- Name: bangumi_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE bangumi_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE bangumi_id_seq OWNER TO heer;
+
+--
+-- Name: bangumi_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE bangumi_id_seq OWNED BY bangumi.id;
+
+
+--
+-- Name: company; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE company (
+    id integer NOT NULL,
+    name character varying(32) NOT NULL,
+    origin_name character varying(32),
+    user_id character varying(16) NOT NULL,
+    create_time timestamp without time zone DEFAULT now() NOT NULL,
+    update_time timestamp without time zone DEFAULT now() NOT NULL,
+    uid integer NOT NULL
+);
+
+
+ALTER TABLE company OWNER TO heer;
+
+--
+-- Name: company_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE company_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE company_id_seq OWNER TO heer;
+
+--
+-- Name: company_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE company_id_seq OWNED BY company.id;
+
+
+--
+-- Name: company_to_bangumi; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE company_to_bangumi (
+    id integer NOT NULL,
+    company_id integer NOT NULL,
+    bangumi_id integer NOT NULL
+);
+
+
+ALTER TABLE company_to_bangumi OWNER TO heer;
+
+--
+-- Name: company_to_bangumi_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE company_to_bangumi_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE company_to_bangumi_id_seq OWNER TO heer;
+
+--
+-- Name: company_to_bangumi_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE company_to_bangumi_id_seq OWNED BY company_to_bangumi.id;
+
+
+--
+-- Name: episode; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE episode (
+    id integer NOT NULL,
+    uid integer NOT NULL,
+    bangumi_id integer NOT NULL,
+    serial integer NOT NULL,
+    name character varying(128) NOT NULL,
+    publish_time timestamp without time zone,
+    finished_time timestamp without time zone,
+    user_id character varying(16) NOT NULL,
+    create_time timestamp without time zone NOT NULL,
+    update_time timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE episode OWNER TO heer;
+
+--
+-- Name: episode_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE episode_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE episode_id_seq OWNER TO heer;
+
+--
+-- Name: episode_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE episode_id_seq OWNED BY episode.id;
+
+
+--
+-- Name: optional; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE optional (
+    id integer NOT NULL,
+    allow_register boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE optional OWNER TO heer;
+
+--
+-- Name: optional_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE optional_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE optional_id_seq OWNER TO heer;
+
+--
+-- Name: optional_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE optional_id_seq OWNED BY optional.id;
+
+
+--
+-- Name: series; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE series (
+    id integer NOT NULL,
+    name character varying(32) NOT NULL,
+    user_id character varying(16) NOT NULL,
+    create_time timestamp without time zone DEFAULT now() NOT NULL,
+    update_time timestamp without time zone DEFAULT now() NOT NULL,
+    uid integer NOT NULL
+);
+
+
+ALTER TABLE series OWNER TO heer;
+
+--
+-- Name: series_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE series_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE series_id_seq OWNER TO heer;
+
+--
+-- Name: series_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE series_id_seq OWNED BY series.id;
+
+
+--
+-- Name: tag; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE tag (
+    id integer NOT NULL,
+    uid integer NOT NULL,
+    name character varying(8) NOT NULL,
+    description character varying(128) NOT NULL,
+    parent integer,
+    user_id character varying(16) NOT NULL,
+    create_time timestamp without time zone NOT NULL,
+    update_time timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE tag OWNER TO heer;
+
+--
+-- Name: tag_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE tag_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE tag_id_seq OWNER TO heer;
+
+--
+-- Name: tag_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE tag_id_seq OWNED BY tag.id;
+
+
+--
+-- Name: tag_to_anime; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE tag_to_anime (
+    id integer NOT NULL,
+    tag_id integer NOT NULL,
+    anime_id integer NOT NULL
+);
+
+
+ALTER TABLE tag_to_anime OWNER TO heer;
+
+--
+-- Name: tag_to_anime_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE tag_to_anime_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE tag_to_anime_id_seq OWNER TO heer;
+
+--
+-- Name: tag_to_anime_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE tag_to_anime_id_seq OWNED BY tag_to_anime.id;
+
+
+--
+-- Name: tag_to_bangumi; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE tag_to_bangumi (
+    id integer NOT NULL,
+    bangumi_id integer NOT NULL,
+    tag_id integer NOT NULL
+);
+
+
+ALTER TABLE tag_to_bangumi OWNER TO heer;
+
+--
+-- Name: tag_to_bangumi_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE tag_to_bangumi_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE tag_to_bangumi_id_seq OWNER TO heer;
+
+--
+-- Name: tag_to_bangumi_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE tag_to_bangumi_id_seq OWNED BY tag_to_bangumi.id;
+
+
+--
+-- Name: user; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE "user" (
+    id character varying(16) NOT NULL,
+    name character varying(16) NOT NULL,
+    password character varying(128) NOT NULL,
+    is_admin boolean DEFAULT false NOT NULL,
+    create_time timestamp without time zone DEFAULT now() NOT NULL,
+    update_time timestamp without time zone DEFAULT now() NOT NULL,
+    last_login timestamp without time zone DEFAULT now() NOT NULL,
+    uid json DEFAULT '{}'::json NOT NULL
+);
+
+
+ALTER TABLE "user" OWNER TO heer;
+
+--
+-- Name: anime id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY anime ALTER COLUMN id SET DEFAULT nextval('anime_id_seq'::regclass);
+
+
+--
+-- Name: author id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY author ALTER COLUMN id SET DEFAULT nextval('author_id_seq'::regclass);
+
+
+--
+-- Name: author_to_anime id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY author_to_anime ALTER COLUMN id SET DEFAULT nextval('author_to_anime_id_seq'::regclass);
+
+
+--
+-- Name: bangumi id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY bangumi ALTER COLUMN id SET DEFAULT nextval('bangumi_id_seq'::regclass);
+
+
+--
+-- Name: company id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY company ALTER COLUMN id SET DEFAULT nextval('company_id_seq'::regclass);
+
+
+--
+-- Name: company_to_bangumi id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY company_to_bangumi ALTER COLUMN id SET DEFAULT nextval('company_to_bangumi_id_seq'::regclass);
+
+
+--
+-- Name: episode id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY episode ALTER COLUMN id SET DEFAULT nextval('episode_id_seq'::regclass);
+
+
+--
+-- Name: optional id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY optional ALTER COLUMN id SET DEFAULT nextval('optional_id_seq'::regclass);
+
+
+--
+-- Name: series id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY series ALTER COLUMN id SET DEFAULT nextval('series_id_seq'::regclass);
+
+
+--
+-- Name: tag id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag ALTER COLUMN id SET DEFAULT nextval('tag_id_seq'::regclass);
+
+
+--
+-- Name: tag_to_anime id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag_to_anime ALTER COLUMN id SET DEFAULT nextval('tag_to_anime_id_seq'::regclass);
+
+
+--
+-- Name: tag_to_bangumi id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag_to_bangumi ALTER COLUMN id SET DEFAULT nextval('tag_to_bangumi_id_seq'::regclass);
+
+
+--
+-- Data for Name: anime; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY anime (id, name, origin_name, type, keyword, series_id, user_id, uid, create_time, update_time, score_like, score_patient, make_make, make_drama, make_music, make_person, make_background, level_r18, level_r18g, other_name) FROM stdin;
+12	????	\N	comic		\N	heerkirov	9	2018-04-09 21:24:59.955	2018-04-09 21:24:59.955	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+13	拉拉	\N	origin		2	heerkirov	10	2018-04-10 08:50:56.491	2018-04-10 08:50:56.491	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+10	????	\N	comic		\N	heerkirov	7	2018-04-09 21:24:18.551	2018-04-09 21:24:18.551	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+11	????	\N	comic		\N	heerkirov	8	2018-04-09 21:24:50.442	2018-04-09 21:24:50.443	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+8	????	\N	comic		\N	heerkirov	5	2018-04-09 21:22:56.244	2018-04-09 21:22:56.244	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+6	弹丸论破	\N	game	a b XXX	\N	heerkirov	3	2018-04-09 21:11:09.145	2018-04-10 19:11:00.616	8	\N	\N	\N	\N	\N	\N	\N	\N	
+7	????	\N	comic		\N	heerkirov	4	2018-04-09 21:20:53.84	2018-04-09 21:20:53.84	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+4	刀剑神域	\N	novel		\N	heerkirov	1	2018-04-09 20:05:46.216	2018-04-09 20:05:46.216	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+9	????	\N	comic		\N	heerkirov	6	2018-04-09 21:23:04.915	2018-04-09 21:23:04.916	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+5	Danganlunpa	\N	game	1 2	\N	heerkirov	2	2018-04-09 21:10:21.77	2018-04-13 10:03:31.184	8	\N	\N	\N	\N	\N	\N	\N	\N	
+20	new obj anime2	\N	novel		40	heerkirov	15	2018-04-11 15:08:16.712	2018-04-11 15:08:16.712	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+21	new obj anime2	\N	novel		40	heerkirov	16	2018-04-11 15:08:31.465	2018-04-11 15:08:31.465	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+19	new obj anime	\N	novel		\N	heerkirov	14	2018-04-11 14:56:57.104	2018-04-11 14:56:57.104	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+17	魔法禁书目录	\N	novel		36	heerkirov	13	2018-04-10 19:01:13.931	2018-04-10 19:01:13.931	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+14	魔法禁书目录	\N	novel		\N	heerkirov	11	2018-04-10 18:48:38.674	2018-04-10 18:48:38.674	\N	\N	\N	\N	\N	\N	\N	\N	\N	
+16	魔法禁书目录	\N	novel		39	heerkirov	12	2018-04-10 18:58:17.099	2018-04-10 18:58:17.099	5	4	NaN	NaN	NaN	NaN	NaN	NaN	NaN	
+\.
+
+
+--
+-- Name: anime_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('anime_id_seq', 21, true);
+
+
+--
+-- Data for Name: author; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY author (id, name, origin_name, user_id, create_time, update_time, uid) FROM stdin;
+2	龙骑士07	D7	heerkirov	2018-04-07 10:54:55.059	2018-04-07 10:54:55.059	2
+3	ZUN		heerkirov	2018-04-07 11:09:42.403	2018-04-07 11:09:42.403	3
+4	龙骑士08	\N	heerkirov	2018-04-07 11:10:28.139	2018-04-07 11:10:28.139	4
+5	龙2	D2	heerkirov	2018-04-07 11:12:01.457	2018-04-07 11:40:39.888	5
+6	aaa		heerkirov	2018-04-07 12:02:49.742	2018-04-07 12:02:49.742	6
+7	aaaaaaaaa	\N	heerkirov	2018-04-07 12:03:26.208	2018-04-07 12:03:26.208	7
+8	龙骑士09	\N	heerkirov	2018-04-07 12:05:09.891	2018-04-07 12:05:09.891	8
+9	龙骑士10	\N	heerkirov	2018-04-07 12:05:41.614	2018-04-07 12:05:41.614	9
+10	龙骑士10	\N	heerkirov	2018-04-07 12:08:27.063	2018-04-07 12:08:27.063	10
+11	龙骑士11	\N	heerkirov	2018-04-07 12:11:07.024	2018-04-07 12:11:07.025	11
+12	龙骑士12	\N	heerkirov	2018-04-07 12:11:50.829	2018-04-07 12:11:50.829	12
+13	龙骑士11	\N	heerkirov	2018-04-07 12:43:27.65	2018-04-07 12:43:27.65	13
+14	龙骑士11	D11	heerkirov	2018-04-07 12:43:48.175	2018-04-07 12:43:48.175	14
+15	龙骑士11	null	heerkirov	2018-04-07 12:43:56.533	2018-04-07 12:43:56.533	15
+16	Loong	\N	heerkirov	2018-04-07 12:44:41.742	2018-04-07 12:44:41.742	16
+17	asasdasd	\N	heerkirov	2018-04-07 12:45:29.008	2018-04-07 12:45:29.008	17
+18	111	11111	heerkirov	2018-04-09 20:46:55.997	2018-04-09 20:46:55.997	18
+19	1111111	阿斯达	heerkirov	2018-04-09 20:47:14.145	2018-04-10 18:09:58.393	19
+20	作者	作者。	heerkirov	2018-04-10 18:10:05.745	2018-04-10 18:10:05.745	20
+22	WORLD!	\N	heerkirov	2018-04-10 20:25:36.633	2018-04-10 20:25:36.633	21
+23	WORLD2!	\N	heerkirov	2018-04-10 20:25:44.228	2018-04-10 20:25:44.228	22
+24	JOJO	\N	heerkirov	2018-04-10 20:32:45.403	2018-04-10 20:32:45.403	23
+25	JOJO	\N	heerkirov	2018-04-10 20:32:54.8	2018-04-10 20:32:54.8	24
+26	JOJO	\N	heerkirov	2018-04-10 20:33:03.29	2018-04-10 20:33:03.29	25
+27	TEST	\N	heerkirov	2018-04-12 20:35:47.233	2018-04-12 20:35:47.233	26
+28	NEW	\N	heerkirov	2018-04-12 20:46:03.536	2018-04-12 20:46:03.536	26
+29	NEW	\N	heerkirov	2018-04-12 20:47:03.002	2018-04-12 20:47:03.002	27
+30	adsfsaedf	\N	heerkirov	2018-04-13 10:03:31.375	2018-04-13 10:03:31.375	28
+\.
+
+
+--
+-- Name: author_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('author_id_seq', 30, true);
+
+
+--
+-- Data for Name: author_to_anime; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY author_to_anime (id, author_id, anime_id) FROM stdin;
+31	26	5
+32	27	5
+33	30	5
+34	30	6
+\.
+
+
+--
+-- Name: author_to_anime_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('author_to_anime_id_seq', 34, true);
+
+
+--
+-- Data for Name: bangumi; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY bangumi (id, uid, name, serial, anime_id, publish_time, play_type, play_length, play_quantity, finished_time, watching, multiple_time, seen_the_original, user_id, create_time, update_time, score_like, score_patient, make_make, make_drama, make_music, make_person, make_background, level_r18, level_r18g) FROM stdin;
+2	2	魔法禁书目录第2季	2	16	2013-10-01 16:24:28	tv	24	24	2014-08-21 16:24:28	t	f	t	heerkirov	2018-04-16 16:26:13.49	2018-04-16 16:26:13.49	5	4	\N	\N	\N	\N	\N	\N	\N
+1	1	魔法禁书目录	1	16	\N	tv	24	24	2014-08-13 16:22:46	t	t	t	heerkirov	2018-04-16 11:26:13.186	2018-04-16 19:20:29.463	5	\N	\N	\N	\N	\N	\N	\N	\N
+\.
+
+
+--
+-- Name: bangumi_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('bangumi_id_seq', 2, true);
+
+
+--
+-- Data for Name: company; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY company (id, name, origin_name, user_id, create_time, update_time, uid) FROM stdin;
+1	J.C.STAFF	\N	heerkirov	2018-04-16 11:29:46.614	2018-04-16 11:29:46.614	1
+2	A-1 Pictures	\N	heerkirov	2018-04-16 11:29:55.599	2018-04-16 11:29:55.599	2
+\.
+
+
+--
+-- Name: company_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('company_id_seq', 2, true);
+
+
+--
+-- Data for Name: company_to_bangumi; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY company_to_bangumi (id, company_id, bangumi_id) FROM stdin;
+10	1	2
+14	1	1
+\.
+
+
+--
+-- Name: company_to_bangumi_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('company_to_bangumi_id_seq', 14, true);
+
+
+--
+-- Data for Name: episode; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY episode (id, uid, bangumi_id, serial, name, publish_time, finished_time, user_id, create_time, update_time) FROM stdin;
+3	8	1	1	1	\N	2014-08-12 00:00:00	heerkirov	2018-04-16 21:37:24.322	2018-04-16 21:39:29.372
+\.
+
+
+--
+-- Name: episode_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('episode_id_seq', 3, true);
+
+
+--
+-- Data for Name: optional; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY optional (id, allow_register) FROM stdin;
+1	f
+\.
+
+
+--
+-- Name: optional_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('optional_id_seq', 2, true);
+
+
+--
+-- Data for Name: series; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY series (id, name, user_id, create_time, update_time, uid) FROM stdin;
+2	LOVELIVE	heerkirov	2018-03-30 08:23:19.376064	2018-03-30 08:23:19.562453	0
+-46	ATELIER	heerkirov	2018-03-30 08:23:19.376064	2018-03-30 08:23:19.562453	0
+-45	Rog	heerkirov	2018-03-30 08:23:19.376064	2018-03-30 08:23:19.562453	0
+-44	IF	heerkirov	2018-03-30 08:23:19.376064	2018-03-30 08:23:19.562453	0
+-42	Doorsd	heerkirov	2018-03-30 08:23:19.376064	2018-03-30 08:23:19.562453	0
+6	err	heerkirov	2018-03-30 08:23:19.376064	2018-03-30 08:23:19.562453	0
+7	花Q	heerkirov	2018-03-30 08:23:19.376064	2018-03-30 08:23:19.562453	0
+8	花Q	heerkirov	2018-03-30 08:23:19.376064	2018-03-30 08:23:19.562453	0
+11	HELLO	heerkirov	2018-03-30 08:55:16.862	2018-03-30 08:55:16.862	0
+1	车万	heerkirov	2018-03-30 08:23:19.376	2018-03-30 08:55:50.945	0
+12	AAA	heerkirov	2018-04-03 19:45:08.783	2018-04-03 19:45:08.784	0
+13	AAB	heerkirov	2018-04-03 19:45:14.004	2018-04-03 19:45:14.004	0
+14	AAC	heerkirov	2018-04-03 19:45:18.063	2018-04-03 19:45:18.063	0
+15	AAD	heerkirov	2018-04-03 19:45:20.518	2018-04-03 19:45:20.518	0
+16	AAE	heerkirov	2018-04-03 19:45:58.623	2018-04-03 19:45:58.623	0
+17	AAF	heerkirov	2018-04-03 19:46:00.784	2018-04-03 19:46:00.784	0
+18	AAG	heerkirov	2018-04-03 19:46:03.21	2018-04-03 19:46:03.21	0
+19	AAH	heerkirov	2018-04-03 19:46:05.781	2018-04-03 19:46:05.781	0
+20	AAI	heerkirov	2018-04-03 19:46:16.567	2018-04-03 19:46:16.567	0
+21	AAJ	heerkirov	2018-04-03 19:46:20.093	2018-04-03 19:46:20.093	0
+22	AAK	heerkirov	2018-04-03 19:46:29.302	2018-04-03 19:46:29.302	0
+23	啊啊啊啊啊	heerkirov	2018-04-05 11:15:00.727	2018-04-05 11:15:00.727	0
+26	啊	heerkirov	2018-04-06 10:12:10.083	2018-04-06 10:12:10.083	0
+24	啊啊撒啊	heerkirov	2018-04-05 12:30:34.101	2018-04-06 10:19:57.713	0
+28	斯蒂芬斯蒂芬	heerkirov	2018-04-06 10:15:45.07	2018-04-06 15:15:35.459	0
+31	NEW	heerkirov	2018-04-06 18:07:17.868	2018-04-06 18:07:17.868	1
+32	NEW2	heerkirov	2018-04-06 18:07:31.542	2018-04-06 18:07:31.542	2
+33	NEW3	heerkirov	2018-04-06 18:07:35.193	2018-04-06 18:07:35.193	3
+35	11	heerkirov	2018-04-09 19:28:10.792	2018-04-09 19:28:10.792	4
+36	新系列2	heerkirov	2018-04-10 18:09:39.425	2018-04-10 18:09:43.698	5
+39	魔禁系列	heerkirov	2018-04-10 18:58:17.144	2018-04-10 18:58:58.918	6
+40	The, World!m	heerkirov	2018-04-10 20:23:13.816	2018-04-12 09:45:35.413	7
+\.
+
+
+--
+-- Name: series_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('series_id_seq', 43, true);
+
+
+--
+-- Data for Name: tag; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY tag (id, uid, name, description, parent, user_id, create_time, update_time) FROM stdin;
+2	2	后宫		\N	heerkirov	2018-04-16 16:23:27.907	2018-04-16 16:23:27.907
+3	3	幻想		\N	heerkirov	2018-04-16 16:51:47.487	2018-04-16 16:51:47.487
+1	1	奇幻		3	heerkirov	2018-04-16 11:30:30.449	2018-04-16 17:07:11.102
+4	4	科幻	科学幻想。	3	heerkirov	2018-04-16 17:07:31.466	2018-04-16 19:38:55.865
+\.
+
+
+--
+-- Name: tag_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('tag_id_seq', 4, true);
+
+
+--
+-- Data for Name: tag_to_anime; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY tag_to_anime (id, tag_id, anime_id) FROM stdin;
+15	1	16
+16	2	16
+\.
+
+
+--
+-- Name: tag_to_anime_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('tag_to_anime_id_seq', 16, true);
+
+
+--
+-- Data for Name: tag_to_bangumi; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY tag_to_bangumi (id, bangumi_id, tag_id) FROM stdin;
+10	2	2
+11	2	1
+18	1	1
+19	1	2
+\.
+
+
+--
+-- Name: tag_to_bangumi_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('tag_to_bangumi_id_seq', 19, true);
+
+
+--
+-- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY "user" (id, name, password, is_admin, create_time, update_time, last_login, uid) FROM stdin;
+user1	AAA	1234	f	2018-03-30 08:22:52.604503	2018-03-30 08:22:52.735447	2018-03-30 08:22:52.844421	{}
+user2	user2	123456	f	2018-03-30 08:22:52.604503	2018-03-30 08:22:52.735447	2018-03-30 08:22:52.844421	{}
+alice	ALICE&ALICE	pw	f	2018-03-30 08:22:52.604	2018-03-30 08:22:52.735	2018-04-08 20:43:03.443	{}
+heerkirov	Heer Kirov	123	f	2018-03-30 08:22:52.604	2018-03-30 08:22:52.735	2018-04-16 21:33:04.771	{"Series":9,"Company":3,"Anime":17,"Author":28,"Bangumi":3,"Tag":5}
+\.
+
+
+--
+-- Name: anime anime_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY anime
+    ADD CONSTRAINT anime_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: author author_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY author
+    ADD CONSTRAINT author_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: author_to_anime author_to_anime_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY author_to_anime
+    ADD CONSTRAINT author_to_anime_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: bangumi bangumi_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY bangumi
+    ADD CONSTRAINT bangumi_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: company company_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY company
+    ADD CONSTRAINT company_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: company_to_bangumi company_to_bangumi_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY company_to_bangumi
+    ADD CONSTRAINT company_to_bangumi_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: episode episode_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY episode
+    ADD CONSTRAINT episode_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: optional optional_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY optional
+    ADD CONSTRAINT optional_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: series series_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY series
+    ADD CONSTRAINT series_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tag tag_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag
+    ADD CONSTRAINT tag_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tag_to_anime tag_to_anime_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag_to_anime
+    ADD CONSTRAINT tag_to_anime_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tag_to_bangumi tag_to_bangumi_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag_to_bangumi
+    ADD CONSTRAINT tag_to_bangumi_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user user_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY "user"
+    ADD CONSTRAINT user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: anime anime___series_id; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY anime
+    ADD CONSTRAINT anime___series_id FOREIGN KEY (series_id) REFERENCES series(id) ON DELETE SET NULL;
+
+
+--
+-- Name: anime anime___user_id; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY anime
+    ADD CONSTRAINT anime___user_id FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: author author___user_id; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY author
+    ADD CONSTRAINT author___user_id FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: author_to_anime author_to_anime___anime_id; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY author_to_anime
+    ADD CONSTRAINT author_to_anime___anime_id FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE;
+
+
+--
+-- Name: author_to_anime author_to_anime___author_id; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY author_to_anime
+    ADD CONSTRAINT author_to_anime___author_id FOREIGN KEY (author_id) REFERENCES author(id) ON DELETE CASCADE;
+
+
+--
+-- Name: bangumi bangumi_anime_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY bangumi
+    ADD CONSTRAINT bangumi_anime_id_fk FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE;
+
+
+--
+-- Name: bangumi bangumi_user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY bangumi
+    ADD CONSTRAINT bangumi_user_id_fk FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: company company___user_id; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY company
+    ADD CONSTRAINT company___user_id FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: company_to_bangumi company_to_bangumi_bangumi_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY company_to_bangumi
+    ADD CONSTRAINT company_to_bangumi_bangumi_id_fk FOREIGN KEY (bangumi_id) REFERENCES bangumi(id) ON DELETE CASCADE;
+
+
+--
+-- Name: company_to_bangumi company_to_bangumi_company_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY company_to_bangumi
+    ADD CONSTRAINT company_to_bangumi_company_id_fk FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE;
+
+
+--
+-- Name: episode episode_bangumi_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY episode
+    ADD CONSTRAINT episode_bangumi_id_fk FOREIGN KEY (bangumi_id) REFERENCES bangumi(id) ON DELETE CASCADE;
+
+
+--
+-- Name: episode episode_user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY episode
+    ADD CONSTRAINT episode_user_id_fk FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: series series___user_id; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY series
+    ADD CONSTRAINT series___user_id FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: tag tag_tag_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag
+    ADD CONSTRAINT tag_tag_id_fk FOREIGN KEY (parent) REFERENCES tag(id) ON DELETE SET NULL;
+
+
+--
+-- Name: tag_to_anime tag_to_anime_anime_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag_to_anime
+    ADD CONSTRAINT tag_to_anime_anime_id_fk FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE;
+
+
+--
+-- Name: tag_to_anime tag_to_anime_tag_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag_to_anime
+    ADD CONSTRAINT tag_to_anime_tag_id_fk FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE;
+
+
+--
+-- Name: tag_to_bangumi tag_to_bangumi_bangumi_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag_to_bangumi
+    ADD CONSTRAINT tag_to_bangumi_bangumi_id_fk FOREIGN KEY (bangumi_id) REFERENCES bangumi(id) ON DELETE CASCADE;
+
+
+--
+-- Name: tag_to_bangumi tag_to_bangumi_tag_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY tag_to_bangumi
+    ADD CONSTRAINT tag_to_bangumi_tag_id_fk FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

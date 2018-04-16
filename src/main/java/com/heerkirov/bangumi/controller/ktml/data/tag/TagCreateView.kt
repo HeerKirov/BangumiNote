@@ -31,7 +31,7 @@ class TagCreateView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::class
             successUrl: "${proxyURL("web_data_tag_list")}",
             content: [
                 {header: "标签", field: "name", type: "text", typeInfo: {length: 8, allowBlank: false}},
-                {header: "描述", field: "description", optionFlag: true, type: "text", typeInfo: {length: 128, allowBlank: true}},
+                {header: "描述", field: "description", optionFlag: true, type: "text", typeInfo: {length: 128, allowBlank: true, area: true}},
                 "hr",
                 {header: "父标签", field: "parent", optionFlag: true, type: "foreignChoice", typeInfo: tag_type_info},
             ]

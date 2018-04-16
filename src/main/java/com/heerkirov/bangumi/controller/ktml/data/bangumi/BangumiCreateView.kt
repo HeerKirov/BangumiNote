@@ -68,7 +68,7 @@ class BangumiCreateView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::c
                 {header: "放送类型", field: "play_type", type: "mapping", defaultValue: "tv", typeInfo: {map: typeMapping}},
                 {header: "放送话数", field: "play_quantity", type: "number", defaultValue: 1, typeInfo: {min: 1, arrowButton: true, narrow: true}},
                 {header: "单话时长", field: "play_length", type: "number", defaultValue: 24, typeInfo: {min: 1, arrowButton: true, narrow: true}},
-                {header: "发布时间", field: "publish_time", optionFlag: true, type: "datetime", typeInfo: {allowNull: true, format: "yyyy-mm-dd", view: "day"}},
+                {header: "发布时间", field: "publish_time", optionFlag: true, type: "datetime", typeInfo: {allowNull: true, format: "yyyy-mm", view: "month"}},
                 "collapse:观影信息",
                 {header: "看完时间", field: "finished_time", optionFlag: true, type: "datetime", typeInfo: {allowNull: true, format: "yyyy-mm-dd", view: "day"}},
                 {header: "观看中", field: "watching", type: "bool", defaultValue: false, typeInfo: {allowNull: false}},

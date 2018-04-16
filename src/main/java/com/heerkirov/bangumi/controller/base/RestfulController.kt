@@ -36,7 +36,7 @@ abstract class RestfulController<T, in KEY>(private val clazz: KClass<T>) : ApiC
     override fun request(): HttpServletRequest = request!!
 
     //重写该字段以传入修订的允许执行的rest方法。默认是全部允许。
-    protected open val methods: Set<RestfulMethod> = emptySet()
+    protected open val methods: Set<RestfulMethod> = setOf(RestfulMethod.LIST, RestfulMethod.CREATE, RestfulMethod.RETRIEVE, RestfulMethod.UPDATE, RestfulMethod.PARTIAL_UPDATE, RestfulMethod.DELETE)
 
     //重写该字段以传入自定义的用户认证条件。默认需要登录认证。
     protected open val permission: SecurityParam = auth(true)
@@ -78,7 +78,7 @@ abstract class RestfulController<T, in KEY>(private val clazz: KClass<T>) : ApiC
     }
 
     //编写自定义的http请求时可以直接返回该方法的结果.
-    protected open fun requestList() = view(permission) {
+    protected open fun requestList(params: Array<Any>? = null) = view(permission) {
         //获得过滤结果
         val filterResult = filter.filterParameters(request().parameterMap as Map<String, Any?>)
         //获得查询结果
@@ -91,7 +91,7 @@ abstract class RestfulController<T, in KEY>(private val clazz: KClass<T>) : ApiC
         }
         mapOf("content" to resultContent, "count" to models.count, "index" to models.index)
     }
-    protected open fun requestCreate() = view(permission) {
+    protected open fun requestCreate(params: Array<Any>? = null) = view(permission) {
         val contentBody = try {contentBodyObject()!!}catch(e: NullPointerException) {
             throw BadRequestException("Information format is wrong.", HttpKeyword.INFORMATION_FORMAT_WRONG)
         }
@@ -105,8 +105,8 @@ abstract class RestfulController<T, in KEY>(private val clazz: KClass<T>) : ApiC
             throw BadRequestException(e.message!!)
         }
     }
-    protected open fun requestRetrieve(id: KEY) = view(permission) {
-        val model = serviceQueryFirst(service, QueryFeature().addWhere(Restrictions.eq(lookup, id)), converter.serviceParseSource)//获得ServiceSet，obj和附加信息。
+    protected open fun requestRetrieve(params: Array<Any>) = view(permission) {
+        val model = serviceQueryFirst(service, QueryFeature().addWhere(Restrictions.eq(lookup, params[0])), converter.serviceParseSource)//获得ServiceSet，obj和附加信息。
         if(model!=null){
             try {
                 converter.serviceParse(model)//通过converter将其转换为json
@@ -117,11 +117,11 @@ abstract class RestfulController<T, in KEY>(private val clazz: KClass<T>) : ApiC
             throw NotFoundException()
         }
     }
-    protected open fun requestUpdate(@PathVariable id: KEY) = view(permission) {
+    protected open fun requestUpdate(params: Array<Any>) = view(permission) {
         val contentBody = try {contentBodyObject()!!}catch(e: NullPointerException) {
             throw BadRequestException("Information format is wrong.", HttpKeyword.INFORMATION_FORMAT_WRONG)
         }
-        val model = serviceQueryFirst(service, QueryFeature().addWhere(Restrictions.eq(lookup, id)))//获得ServiceSet，obj和附加信息。这里不需要附加信息，因为后面提交时还会获取。
+        val model = serviceQueryFirst(service, QueryFeature().addWhere(Restrictions.eq(lookup, params[0])))//获得ServiceSet，obj和附加信息。这里不需要附加信息，因为后面提交时还会获取。
         if(model!=null){
             val updateModel = try {//通过converter更新obj并获得提交的附加信息
                 modelUpdate(contentBody, model.obj)
@@ -138,11 +138,11 @@ abstract class RestfulController<T, in KEY>(private val clazz: KClass<T>) : ApiC
             throw NotFoundException()
         }
     }
-    protected open fun requestPartialUpdate(@PathVariable id: KEY) = view(permission) {
+    protected open fun requestPartialUpdate(params: Array<Any>) = view(permission) {
         val contentBody = try {contentBodyObject()!!}catch(e: NullPointerException) {
             throw BadRequestException("Information format is wrong.", HttpKeyword.INFORMATION_FORMAT_WRONG)
         }
-        val model = serviceQueryFirst(service, QueryFeature().addWhere(Restrictions.eq(lookup, id)), converter.serviceParseSource)
+        val model = serviceQueryFirst(service, QueryFeature().addWhere(Restrictions.eq(lookup, params[0])), converter.serviceParseSource)
         if(model!=null){
             val updateModel = try {
                 modelPartialUpdate(contentBody, model.obj)
@@ -159,8 +159,8 @@ abstract class RestfulController<T, in KEY>(private val clazz: KClass<T>) : ApiC
             throw NotFoundException()
         }
     }
-    protected open fun requestDelete(@PathVariable id: KEY) = view(permission) {
-        val model = serviceQueryFirst(service, QueryFeature().addWhere(Restrictions.eq(lookup, id)))
+    protected open fun requestDelete(params: Array<Any>) = view(permission) {
+        val model = serviceQueryFirst(service, QueryFeature().addWhere(Restrictions.eq(lookup, params[0])))
         if(model!=null){
             modelDelete(model.obj)
             emptyMap<String, Any?>()
@@ -170,17 +170,16 @@ abstract class RestfulController<T, in KEY>(private val clazz: KClass<T>) : ApiC
     }
 
     private fun<T> checkMethod(method: RestfulMethod, action: ()->T): T {
-        if(methods.isEmpty()||methods.contains(method))return action()
+        if(methods.contains(method))return action()
         else throw MethodNotAllowedException()
     }
 
     @RequestMapping(method = [RequestMethod.GET])fun list() = checkMethod(RestfulMethod.LIST) {requestList()}
     @RequestMapping(method = [RequestMethod.POST])@ResponseStatus(HttpStatus.CREATED)fun create() = checkMethod(RestfulMethod.CREATE) {requestCreate()}
-    @RequestMapping("/{id}", method = [RequestMethod.GET])fun retrieve(@PathVariable id: KEY) = checkMethod(RestfulMethod.RETRIEVE) {requestRetrieve(id)}
-    @RequestMapping("/{id}", method = [RequestMethod.PUT])fun update(@PathVariable id: KEY) = checkMethod(RestfulMethod.UPDATE) {requestUpdate(id)}
-    @RequestMapping("/{id}", method = [RequestMethod.PATCH])fun partialUpdate(@PathVariable id: KEY) = checkMethod(RestfulMethod.PARTIAL_UPDATE) {requestPartialUpdate(id)}
-    @RequestMapping("/{id}", method = [RequestMethod.DELETE])@ResponseStatus(HttpStatus.NO_CONTENT)fun delete(@PathVariable id: KEY) = checkMethod(RestfulMethod.DELETE) {requestDelete(id)}
-
+    @RequestMapping("/{id}", method = [RequestMethod.GET])fun retrieve(@PathVariable id: KEY) = checkMethod(RestfulMethod.RETRIEVE) {requestRetrieve(arrayOf(id))}
+    @RequestMapping("/{id}", method = [RequestMethod.PUT])fun update(@PathVariable id: KEY) = checkMethod(RestfulMethod.UPDATE) {requestUpdate(arrayOf(id))}
+    @RequestMapping("/{id}", method = [RequestMethod.PATCH])fun partialUpdate(@PathVariable id: KEY) = checkMethod(RestfulMethod.PARTIAL_UPDATE) {requestPartialUpdate(arrayOf(id))}
+    @RequestMapping("/{id}", method = [RequestMethod.DELETE])@ResponseStatus(HttpStatus.NO_CONTENT)fun delete(@PathVariable id: KEY) = checkMethod(RestfulMethod.DELETE) {requestDelete(arrayOf(id))}
 }
 
 enum class RestfulMethod {

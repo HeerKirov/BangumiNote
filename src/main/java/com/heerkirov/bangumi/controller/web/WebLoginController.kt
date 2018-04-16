@@ -21,9 +21,6 @@ class WebLoginController : HtmlController() {
         if(security().currentUser()!=null)return redirect(homeViewName)
         else return super.servlet(view, viewModel)
     }
-
-    @RequestMapping("/login2") fun login2Page() = ModelAndView("web_login/login")
-
     @RequestMapping("/login")
     fun loginPage() = servlet(WebLoginView::class)
     @RequestMapping("/register")

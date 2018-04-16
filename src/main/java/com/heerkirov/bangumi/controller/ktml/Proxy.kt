@@ -9,6 +9,9 @@ class Proxy : ConstProxy({
     //web login系列地址
     url("web_login", {"/web/login"})
     url("web_register", {"/web/register"})
+    //web 资料序列地址
+    url("web_document", {"/web/self/document"})
+    url("web_password", {"/web/self/password"})
     //home系列地址
     url("web_home", {"/web/home"})
     //diary系列地址
@@ -41,6 +44,8 @@ class Proxy : ConstProxy({
     url("api_user_login", {"/api/user/login.json"})
     url("api_user_logout", {"/api/user/logout.json"})
     url("api_user_register", {"/api/user/register.json"})
+    url("api_user_current", {"/api/user/current.json"})
+    url("api_user_password", {"/api/user/password.json"})
     //content系列api
     url("api_content_series", {"/api/content/series.json"})
     url("api_content_series_detail", {"/api/content/series/${it["id"]?:""}.json"})
@@ -52,6 +57,8 @@ class Proxy : ConstProxy({
     url("api_content_anime_detail", {"/api/content/animes/${it["id"]?:""}.json"})
     url("api_content_bangumi", {"/api/content/bangumis.json"})
     url("api_content_bangumi_detail", {"/api/content/bangumis/${it["id"]?:""}.json"})
+    url("api_content_bangumi_episode", {"/api/content/bangumis/${it["parentId"]?:""}/episode.json"})
+    url("api_content_bangumi_episode_detail", {"/api/content/bangumis/${it["parentId"]?:""}/episode/${it["id"]?:""}.json"})
     url("api_content_tag", {"/api/content/tags.json"})
     url("api_content_tag_detail", {"/api/content/tags/${it["id"]?:""}.json"})
 })

@@ -4,6 +4,7 @@ import com.heerkirov.bangumi.model.base.Model
 import com.heerkirov.bangumi.model.base.UBModel
 import java.util.*
 import javax.persistence.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
 @Entity @Table(name = "public.series")
@@ -138,7 +139,7 @@ class Episode (
         @SequenceGenerator(name="EPISODE_ID_SEQ", sequenceName="episode_id_seq", allocationSize = 1)
         @Column(name = "id")var id: Int? = null,
         @Column(name = "uid", nullable = false)var uid: Int? = null,
-        @ManyToOne@JoinColumn(name = "bangumi_id", nullable = false)var bangumi: Bangumi? = null,
+        @Column(name = "bangumi_id", nullable = false)var bangumi_id: Int? = null,
         @Column(name = "serial", nullable = false)var serial: Int? = null,
         @Column(name = "name", nullable = false, length = 128)var name: String = "",
         @Column(name = "publish_time")var publishTime: Calendar? = null,
@@ -165,23 +166,17 @@ class Tag(
         @Column(name = "update_time", nullable = false)var updateTime: Calendar? = null
 ): UBModel()
 
-@Entity @Table(name = "public.author_to_anime")
-class AuthorToAnime(
-        @Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="AUTHOR_TO_ANIME_ID_SEQ")
-        @SequenceGenerator(name="AUTHOR_TO_ANIME_ID_SEQ", sequenceName="author_to_anime_id_seq", allocationSize = 1)
-        @Column(name = "id")var id: Int? = null,
-        @Column(name = "author_id", nullable = false)var authorId: Int? = null,
-        @Column(name = "anime_id", nullable = false)var animeId: Int? = null
-): Model()
 
-class CompanyToBangumi(
-        var id: Int,
-        var company_id: Int,
-        var bangumi_id: Int
-)
+class Diary(
+        var id: Int? = null,
+        var uid: Int? = null,
+        var bangumi: Bangumi? = null,
+        var name: String = "",
 
-class TagToCommit(
-        var id: Int,
-        var commit_id: Int,
-        var tag_id: Int
+        var totalEpisode: Int? = null,
+        var publishEpisode: Int? = null,
+        var hibekitmanEpisode: Int? = null,
+
+        var isCompleted: Boolean = false,
+        var publishPlan: List<Calendar> = ArrayList()
 )

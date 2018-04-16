@@ -27,4 +27,7 @@ interface AnimeService : RestfulService<Anime>
 interface BangumiService: RestfulService<Bangumi>
 
 @Service
+interface EpisodeService: RestfulService<Episode>
+
+@Service
 interface TagService: RestfulService<Tag>

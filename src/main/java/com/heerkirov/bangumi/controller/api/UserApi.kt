@@ -3,19 +3,18 @@ package com.heerkirov.bangumi.controller.api
 import com.heerkirov.bangumi.controller.base.*
 import com.heerkirov.bangumi.controller.converter.ModelConverter
 import com.heerkirov.bangumi.model.User
-import com.heerkirov.bangumi.service.OptionalService
-import com.heerkirov.bangumi.service.Security
-import com.heerkirov.bangumi.service.ServiceSet
-import com.heerkirov.bangumi.service.UserService
+import com.heerkirov.bangumi.service.*
 import com.heerkirov.converter.ConvertError
 import com.heerkirov.converter.Converter
 import com.heerkirov.converter.DateTimeConverter
+import com.heerkirov.converter.StringConverter
 import org.hibernate.criterion.Restrictions
 import org.springframework.stereotype.Controller
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.servlet.http.HttpServletRequest
+import kotlin.collections.HashMap
 
 @Controller
 @RequestMapping("/api/user")
@@ -76,7 +75,7 @@ class UserApi(@Autowired private val security: Security,
             throw ForbiddenException("Cannot register because administrator forbid it.", HttpKeyword.REGISTER_FORBIDDEN)
         }
     }
-    @RequestMapping("/currentUser", method = [RequestMethod.GET])
+    @RequestMapping("/current", method = [RequestMethod.GET])
     fun getCurrentUser() = view(auth(true)) {
         val model = security.currentUser()
         if(model!=null){
@@ -87,7 +86,7 @@ class UserApi(@Autowired private val security: Security,
             throw NotFoundException()
         }
     }
-    @RequestMapping("/currentUser", method = [RequestMethod.PUT])
+    @RequestMapping("/current", method = [RequestMethod.PUT])
     fun putCurrentUser() = view(auth(true)) {
         val contentBody = try {contentBodyObject()!!}catch(e: NullPointerException) {
             throw BadRequestException("Information format is wrong.", HttpKeyword.INFORMATION_FORMAT_WRONG)
@@ -99,10 +98,34 @@ class UserApi(@Autowired private val security: Security,
             }catch(e: ConvertError){
                 throw BadRequestException(e.message!!)
             }
-            userService.update(ServiceSet(updateModel))
+            try{userService.update(ServiceSet(updateModel))}
+            catch(e: ServiceRuntimeException) {
+                throw BadRequestException(e.message!!)
+            }
             currentUserConverter.parse(updateModel)
         }else{
             throw NotFoundException()
+        }
+    }
+    @RequestMapping("/password", method = [RequestMethod.GET])
+    fun getPassword() = view(auth(true)) {
+        HashMap<String, Any>()
+    }
+    @RequestMapping("/password", method = [RequestMethod.PUT])
+    fun setPassword() = view(auth(true)) {
+        val contentBody = try {contentBodyObject()!!}catch(e: NullPointerException) {
+            throw BadRequestException("Information format is wrong.", HttpKeyword.INFORMATION_FORMAT_WRONG)
+        }
+        if(contentBody.containsKey("old_password")&&contentBody.containsKey("new_password")) {
+            val old_password = contentBody["old_password"].toString()
+            val new_password = contentBody["new_password"].toString()
+            if(security.changePassword(old_password, new_password)) {
+                mapOf("message" to "OK")
+            }else{
+                throw BadRequestException("Password Wrong.")
+            }
+        }else{
+            throw BadRequestException("No enough information.", HttpKeyword.NO_ENOUGH_INFORMATION)
         }
     }
 
@@ -117,6 +140,6 @@ class UserApi(@Autowired private val security: Security,
             ModelConverter.Field("admin", jsonName = "is_admin", allowToObject = false,  converter = Converter(Boolean::class)),
             ModelConverter.Field("createTime", jsonName = "create_time", allowToObject = false,  converter = DateTimeConverter()),
             ModelConverter.Field("updateTime", jsonName = "update_time", allowToObject = false,  converter = DateTimeConverter()),
-            ModelConverter.Field("last_login", jsonName = "last_login", allowToObject = false,  converter = DateTimeConverter())
+            ModelConverter.Field("lastLogin", jsonName = "last_login", allowToObject = false,  converter = DateTimeConverter())
     ))
 }

@@ -378,6 +378,7 @@ var create_field_initializations = {
     text: function (info) {
         if(!("allowBlank" in info))info["allowBlank"] = true;
         if(!("allowNull" in info))info["allowNull"] = false;
+        if(!("area" in info))info["area"] = false;
     },
     password: function (info) {
         if(!("allowBlank" in info))info["allowBlank"] = true;
@@ -427,7 +428,7 @@ var create_field_initializations = {
         }
     },
     bool: function(info) {
-        if(!("color" in info))info["color"] = "info";
+        if(!("color" in info))info["color"] = "secondary";
         if(!("yesText" in info))info["yesText"] = "是";
         if(!("noText" in info))info["noText"] = "否";
         if(!("allowNull" in info))info["allowNull"] = false;
@@ -440,11 +441,9 @@ var create_field_initializations = {
  */
 var create_field_elements = {
     text: function(info, default_value) {
-        var ret = $('<input type="text" class="form-control"/>');
+        var ret = info.area? $('<textarea class="form-control" rows="3"></textarea>') : $('<input type="text" class="form-control"/>');
         if(default_value!==null)ret.val(default_value);
-        if(info){
-            if(("placeholder" in info))ret.attr("placeholder", info["placeholder"]);
-        }
+        if(("placeholder" in info))ret.attr("placeholder", info["placeholder"]);
         return ret;
     },
     password: function(info, default_value) {
@@ -678,8 +677,6 @@ var create_field_elements = {
             change_color(false);
         });
         info["_value"] = default_value;
-        info["_yes_btn"] = yes_btn;
-        info["_no_btn"] = no_btn;
         change_color(default_value);
         return $('<div class="btn-group"></div>').append(yes_btn).append(no_btn);
     }
@@ -800,6 +797,7 @@ var default_create_field_elements = "text";
 /** typeInfo文档：
  *  text: { //default: string
  *      placeholder: string = undefined 为文本框添加底部提示文本
+ *      area: bool = false 大型文本框。
  *
  *      allowBlank: bool = true 是否允许内容为空
  *      allowNull: bool = false 是否允许为null。这将在内容为空时返回null。
@@ -845,12 +843,12 @@ var default_create_field_elements = "text";
  *      foreignValue: function(json) 用于生成准备提交的数据。
  *      customContent: [{}] 自定义项的子项。内容可以填写与CREATE面板其他组件相同的结构。
  *  }
- *  bool: {
- *      allowNull: bool = false 是否允许null值。
- *      color: string = "info" 颜色。
- *      yesText: string = "是"
- *      noText: string = "否"
- *  }
+             *  bool: {
+             *      allowNull: bool = false 是否允许null值。
+             *      color: string = "secondary" 颜色。
+             *      yesText: string = "是"
+             *      noText: string = "否"
+             *  }
  */
 /**TODO create页
  需要做一个匹配List<*>的东西，能够将一个序列的东西转化为列表。内容产生倒不必太严格。

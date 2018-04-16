@@ -1,14 +1,20 @@
 package com.heerkirov.bangumi.controller.api
 
-import com.heerkirov.bangumi.controller.base.UserBelongRestfulController
+import com.heerkirov.bangumi.controller.base.*
 import com.heerkirov.bangumi.controller.converter.*
 import com.heerkirov.bangumi.controller.filter.*
+import com.heerkirov.bangumi.dao.QueryFeature
 import com.heerkirov.bangumi.model.*
 import com.heerkirov.bangumi.service.*
 import com.heerkirov.converter.*
+import org.hibernate.criterion.Restrictions
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.ResponseStatus
 
 @Controller @RequestMapping("/api/content/series")
 class SeriesApi(@Autowired private val seriesService: SeriesService): UserBelongRestfulController<Series, Int>(Series::class) {
@@ -293,4 +299,45 @@ class TagApi(@Autowired private val tagService: TagService): UserBelongRestfulCo
                     Filter.FilterField(Int::class, "uid"),
                     Filter.FilterField(String::class, "name"),
                     Filter.FilterField(Int::class, "parent", modelName = "parent.id")))
+}
+@Controller @RequestMapping("/api/content/bangumis/{parentId}/episodes")
+class EpisodeApi(@Autowired private val episodeService: EpisodeService): UserBelongNestedController<Episode>(Episode::class) {
+    override val service: RestfulService<Episode> = episodeService
+    override val converter: ModelConverter<Episode> = ModelConverter(Episode::class, arrayOf(
+            ModelConverter.Field("id", allowToObject = false, converter = IntConverter()),
+            ModelConverter.Field("uid", allowToObject = false, converter = IntConverter()),
+            ModelConverter.Field("serial", notBlank = true, converter = IntConverter()),
+            ModelConverter.Field("name", notBlank = true, converter = StringConverter()),
+
+            ModelConverter.Field("publishTime", jsonName = "publish_time", notNull = false, required = false, converter = DateTimeConverter()),
+            ModelConverter.Field("finishedTime", jsonName = "finished_time", notNull = false, required = false, converter = DateTimeConverter()),
+
+            ModelConverter.Field("createTime", jsonName = "create_time", allowToObject = false, converter = DateTimeConverter()),
+            ModelConverter.Field("updateTime", jsonName = "update_time", allowToObject = false, converter = DateTimeConverter())
+    ))
+    override val filter: Filter = Filter(searchMap = arrayOf("name, description"),
+            orderMap = arrayOf(
+                    Filter.OrderField("id"),
+                    Filter.OrderField("uid"),
+                    Filter.OrderField("name"),
+                    Filter.OrderField("serial", default = "asc"),
+                    Filter.OrderField("publish_time", modelName = "publishTime"),
+                    Filter.OrderField("finished_time", modelName = "finishedTime"),
+                    Filter.OrderField("create_time", modelName = "createTime"),
+                    Filter.OrderField("update_time", modelName = "updateTime")),
+            filterMap = arrayOf(
+                    Filter.FilterField(Int::class, "id"),
+                    Filter.FilterField(Int::class, "uid"),
+                    Filter.FilterField(Int::class, "serial"),
+                    Filter.FilterField(String::class, "name")))
+
+    override val parentLookup: String = "bangumi_id"
+
+    @RequestMapping("", method = [RequestMethod.GET])fun list(@PathVariable parentId: Int) = requestList(arrayOf(parentId))
+    @RequestMapping("", method = [RequestMethod.POST])@ResponseStatus(HttpStatus.CREATED)fun create(@PathVariable parentId: Int) = requestCreate(arrayOf(parentId))
+    @RequestMapping("/{id}", method = [RequestMethod.GET])fun retrieve(@PathVariable parentId: Int, @PathVariable id: Int) = requestRetrieve(arrayOf(parentId, id))
+    @RequestMapping("/{id}", method = [RequestMethod.PUT])fun update(@PathVariable parentId: Int, @PathVariable id: Int) = requestUpdate(arrayOf(parentId, id))
+    @RequestMapping("/{id}", method = [RequestMethod.PATCH])fun partialUpdate(@PathVariable parentId: Int, @PathVariable id: Int) = requestPartialUpdate(arrayOf(parentId, id))
+    @RequestMapping("/{id}", method = [RequestMethod.DELETE])@ResponseStatus(HttpStatus.NO_CONTENT)fun delete(@PathVariable parentId: Int, @PathVariable id: Int) = requestDelete(arrayOf(parentId, id))
+
 }

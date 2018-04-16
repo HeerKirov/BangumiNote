@@ -363,13 +363,15 @@ function build_detail(obj) {
         td_content.append(readEle).append(writeEle).append(loadingDiv).append(errorDiv);
 
         var td_end = $('<div class="col-1"></div>');
-        var updateBtn = $('<button class="btn btn-outline-secondary btn"></button>')
-            .append($('<i class="fa fa-pencil"></i>'))
-            .click(get_func_edit_btn(index));
-        var submitBtn = $('<button class="btn btn-secondary btn"></button>')
-            .append($('<i class="fa fa-check"></i>'))
-            .click(get_func_submit_btn(index));
-        td_end.append(updateBtn).append(submitBtn);
+        if(_info.allowPartialUpdate) {
+            var updateBtn = $('<button class="btn btn-outline-secondary btn"></button>')
+                .append($('<i class="fa fa-pencil"></i>'))
+                .click(get_func_edit_btn(index));
+            var submitBtn = $('<button class="btn btn-secondary btn"></button>')
+                .append($('<i class="fa fa-check"></i>'))
+                .click(get_func_submit_btn(index));
+            td_end.append(updateBtn).append(submitBtn);
+        }
 
         tr.append(td_header).append(td_content).append(td_end);
         return {
@@ -815,12 +817,13 @@ var detail_fields = {
         init: function (info) {
             if(!("allowBlank" in info))info["allowBlank"] = true;
             if(!("allowNull" in info))info["allowNull"] = false;
+            if(!("area" in info))info["area"] = false;
         },
         read: function (info) {
             return $('<label></label>');
         },
         write: function (info) {
-            var ret = $('<input type="text" class="form-control"/>');
+            var ret = info.area? $('<textarea class="form-control" rows="3"></textarea>') : $('<input type="text" class="form-control"/>');
             if(info){
                 if(("placeholder" in info))ret.attr("placeholder", info["placeholder"]);
             }
@@ -910,7 +913,7 @@ var detail_fields = {
             var ret = info["hidden_now_value"];
             if(info){
                 if((!info.allowBlank)&&ret===undefined)throw "内容不能为空。";
-                if(info.allowNull&&ret.length === 0)ret = null;
+                if(info.allowNull&&ret!==null&&ret.length === 0)ret = null;
             }
             return ret;
         },
@@ -1406,12 +1409,68 @@ var detail_fields = {
             }
         },
         readOnly: true
+    },
+    bool: {
+        init: function (info) {
+            if(!("color" in info))info["color"] = "secondary";
+            if(!("yesText" in info))info["yesText"] = "是";
+            if(!("noText" in info))info["noText"] = "否";
+            if(!("allowNull" in info))info["allowNull"] = false;
+            if(!("yesIcon" in info))info["yesIcon"] = true;
+            if(!("noIcon" in info))info["noIcon"] = true;
+        },
+        read: function (info) {
+            return $('<i></i>');
+        },
+        write: function (info) {
+            info["_change_color"] = function (val) {
+                if(val === true) {
+                    info._yes_btn.attr("class", "btn btn-" + info.color);
+                    info._no_btn.attr("class", "btn btn-outline-" + info.color);
+                }else if(val === false) {
+                    info._no_btn.attr("class", "btn btn-" + info.color);
+                    info._yes_btn.attr("class", "btn btn-outline-" + info.color);
+                }else{
+                    info._yes_btn.attr("class", "btn btn-outline-" + info.color);
+                    info._no_btn.attr("class", "btn btn-outline-" + info.color);
+                }
+            };
+            var yes_btn = $('<button></button>').text(info.yesText).click(function () {
+                info._value = true;
+                info._change_color(true);
+            });
+            var no_btn = $('<button></button>').text(info.noText).click(function () {
+                info._value = false;
+                info._change_color(false);
+            });
+            info["_value"] = null;
+            info["_yes_btn"] = yes_btn;
+            info["_no_btn"] = no_btn;
+            info._change_color(null);
+            return $('<div class="btn-group"></div>').append(yes_btn).append(no_btn);
+        },
+        get: function (info, ele) {
+            if((!info.allowNull)&&info._value === null)throw "必须给出选项。";
+            return info._value;
+        },
+        set: function (info, readEle, writeEle, value) {
+            if(writeEle !== null) {
+                info["_value"] = value;
+                info._change_color(value);
+            }
+            if(readEle !== null) {
+                if(value === true && info.yesIcon) readEle.attr("class", "fa fa-check");
+                else if(value === false && info.noIcon) readEle.attr("class", "fa fa-times");
+                else readEle.attr("class", "");
+            }
+        }
     }
 };
 var default_detail_field_elements = "text";
 /** typeInfo文档：
  * text: {
  *      placeholder: string = undefined 在edit模式下写在文本框底
+ *      area: bool = false 大型文本框。
  *
  *      allowBlank: bool = true 是否允许内容为空
  *      allowNull: bool = false 是否允许null。在内容为空时，会返回null。
@@ -1464,6 +1523,14 @@ var default_detail_field_elements = "text";
  *  constLink: {
  *      text: string 展示的常值内容。
  *      link: string|function(json) 构成的链接。如果链接是函数，会在每次刷新时重构一次。
+ *  }
+ *  bool: {
+ *      allowNull: bool = false 是否允许null值。
+ *      color: string = "secondary" 颜色。
+ *      yesText: string = "是"
+ *      noText: string = "否"
+ *      yesIcon: bool = true 在read模式下，是否显示true的图标。
+ *      noIcon: bool = true
  *  }
  */
 
