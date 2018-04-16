@@ -425,6 +425,12 @@ var create_field_initializations = {
                 }
             }
         }
+    },
+    bool: function(info) {
+        if(!("color" in info))info["color"] = "info";
+        if(!("yesText" in info))info["yesText"] = "是";
+        if(!("noText" in info))info["noText"] = "否";
+        if(!("allowNull" in info))info["allowNull"] = false;
     }
 };
 /** create的field的构建模式。
@@ -649,7 +655,34 @@ var create_field_elements = {
             }
             return $('<div class="row"></div>').append(all_panel);
         }
-    })()
+    })(),
+    bool: function(info, default_value) {
+        var change_color = function (val) {
+            if(val === true) {
+                yes_btn.attr("class", "btn btn-" + info.color);
+                no_btn.attr("class", "btn btn-outline-" + info.color);
+            }else if(val === false) {
+                no_btn.attr("class", "btn btn-" + info.color);
+                yes_btn.attr("class", "btn btn-outline-" + info.color);
+            }else{
+                yes_btn.attr("class", "btn btn-outline-" + info.color);
+                no_btn.attr("class", "btn btn-outline-" + info.color);
+            }
+        };
+        var yes_btn = $('<button></button>').text(info.yesText).click(function () {
+            info._value = true;
+            change_color(true);
+        });
+        var no_btn = $('<button></button>').text(info.noText).click(function () {
+            info._value = false;
+            change_color(false);
+        });
+        info["_value"] = default_value;
+        info["_yes_btn"] = yes_btn;
+        info["_no_btn"] = no_btn;
+        change_color(default_value);
+        return $('<div class="btn-group"></div>').append(yes_btn).append(no_btn);
+    }
 };
 /** create的field的内容检查。
  * <typeName> : function(typeInfo: any, ele: jQuery) 给出该构建模式的内容提取与检查函数。
@@ -756,6 +789,10 @@ var create_field_validates = {
             else if(info.allowNull) return null;
             else throw "此项的值不能为空。";
         }
+    },
+    bool: function (info, ele) {
+        if((!info.allowNull)&&info._value === null)throw "必须给出选项。";
+        return info._value;
     }
 };
 var default_create_field_elements = "text";
@@ -806,7 +843,13 @@ var default_create_field_elements = "text";
  *      foreignRequest: function(function(json)) 回调函数，直接调用此函数取得默认列表参数。要求不直接返回值，而是通过传入的回调函数参数返回。
  *      foreignHeader: function(json) 用于生成在select内展示的标题。
  *      foreignValue: function(json) 用于生成准备提交的数据。
- *      customContent: [{}] 自定义项的子项。内容可以填写与CRAETE面板其他组件相同的结构。
+ *      customContent: [{}] 自定义项的子项。内容可以填写与CREATE面板其他组件相同的结构。
+ *  }
+ *  bool: {
+ *      allowNull: bool = false 是否允许null值。
+ *      color: string = "info" 颜色。
+ *      yesText: string = "是"
+ *      noText: string = "否"
  *  }
  */
 /**TODO create页

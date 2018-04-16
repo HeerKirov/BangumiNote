@@ -80,31 +80,9 @@
             <div class="row">
                 <div class="col-3">TEST</div>
                 <div class="col-9">
-                    <!-- Nav tabs -->
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li id="item1" class="nav-item active" role="presentation">
-                            <a class="nav-link" data-toggle="tab" aria-controls="foreign" role="tab" href="#foreign">已有项</a>
-                        </li>
-                        <li id="item2" class="nav-item" role="presentation">
-                            <a class="nav-link" data-toggle="tab" aria-controls="custom1" role="tab" href="#custom1">新建项1</a>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="btn btn-success btn-sm ml-2 mr-2"><i class="fa fa-plus"></i></button>
-                        </li>
-                    </ul>
-                    <!-- Tab panes -->
-                    <div class="tab-content">
-                        <div id="foreign" class="container tab-pane active" role="tabpanel"><br>
-                            <select multiple id="test-select" class="form-control">
-                                <option id="0" value="0">test0</option>
-                                <option id="1" value="1">test1</option>
-                                <option id="2" value="2">test2</option>
-                                <option id="3" value="3">test3</option>
-                            </select>
-                        </div>
-                        <div id="custom1" class="container tab-pane fade" role="tabpanel"><br>
-                            CREATE NEW
-                        </div>
+                    <div class="btn-group">
+                        <button id="Yes" class="btn btn-info">是</button>
+                        <button id="No" class="btn btn-outline-info">否</button>
                     </div>
                 </div>
             </div>
@@ -131,9 +109,16 @@
         count: 3
     };
     $(document).ready(function () {
-        var select = $("#test-select");
-        select.find("#1").attr("selected", true);
-        select.find("#3").attr("selected", true);
+        var yes = $("#Yes");
+        var no = $("#No");
+        yes.click(function () {
+           yes.attr("class", "btn btn-info");
+           no.attr("class", "btn btn-outline-info");
+        });
+        no.click(function () {
+            no.attr("class", "btn btn-info");
+            yes.attr("class", "btn btn-outline-info");
+        });
         build_navlist($("#nav-list"), [
             {title: "系列", link: "/web/data/series"},
             {title: "作者", link: "/web/data/authors"},

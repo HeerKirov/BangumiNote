@@ -813,4 +813,7 @@ var default_list_field_elements = "text";
  * datetime: {
  *      format: string = "yyyy-mm-dd hh:ii:ss" 展示的时间日期格式。按示例所示填写即可。
  * }
+ * bool: {
+ *
+ * }
  */

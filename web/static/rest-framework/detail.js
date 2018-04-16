@@ -777,7 +777,6 @@ function get_detail_field_value(field, ele) {
     return value;
 }
 function set_detail_field_value(field, readEle, writeEle, value) {
-    console.log("set " + field.field);
     //这个函数会为field的ele赋值.为read组件和write组件同时赋值。如果存在不可读或不可写，对应的组件引用会为null。
     if(field instanceof Object &&(field.readable||field.writable)) {
         if (field.type === null) detail_fields[default_detail_field_elements]["set"](field.typeInfo, readEle, writeEle, value);
@@ -1348,24 +1347,28 @@ var detail_fields = {
                 readEle.html("");
                 var first = true;
                 for(var i in value) {
-                    if(first)first = false;else readEle.append(", ");
-                    var str = (value[i] !== null) ? info.showContent(value[i]) : "";
-                    var link = null;
-                    if($.isFunction(info.link))link = info.link(value[i]);
-                    else if(info.link !== null)link = info.link;
-                    if(link !== null)readEle.append($('<a></a>').attr("href", link).text(str));
-                    else readEle.append(str);
+                    if(value !== null) {
+                        if(first)first = false;else readEle.append(", ");
+                        var str = (value[i] !== null) ? info.showContent(value[i]) : "";
+                        var link = null;
+                        if($.isFunction(info.link))link = info.link(value[i]);
+                        else if(info.link !== null)link = info.link;
+                        if(link !== null)readEle.append($('<a></a>').attr("href", link).text(str));
+                        else readEle.append(str);
+                    }
                 }
                 readEle.append()
             }else{
                 //单值模式下，value是一个单独的值。
                 readEle.html("");
-                str = (value !== null) ? info.showContent(value) : "";
-                link = null;
-                if($.isFunction(info.link))link = info.link(value);
-                else if(info.link !== null)link = info.link;
-                if(link !== null)readEle.append($('<a></a>').attr("href", link).text(str));
-                else readEle.append(str);
+                if(value !== null) {
+                    str = info.showContent(value);
+                    link = null;
+                    if($.isFunction(info.link))link = info.link(value);
+                    else if(info.link !== null)link = info.link;
+                    if(link !== null)readEle.append($('<a></a>').attr("href", link).text(str));
+                    else readEle.append(str);
+                }
             }
             info.request_write(writeEle, value);
         },

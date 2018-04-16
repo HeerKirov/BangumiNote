@@ -5,7 +5,6 @@
  * obj 传入jquery对象
  * arr 传入{title: String, link: String}的数组，表示要构造的内容。
 */
-
 function build_navbar(obj, arr) {
     var ul = $('<ul class="nav"></ul>');
     for(var i in arr){
@@ -73,46 +72,50 @@ function purl_param(params) {
 /**将一个从json得到的y-m-d h:min:s.ms字串格式化为指定的格式。
  */
 function fmt_dt_json(json, fmt) {
-    var origin = json.split(/[-:. ]/);
-    var o = {
-        "m+" : origin[1],                 //月份
-        "d+" : origin[2],                    //日
-        "h+" : origin[3],                   //小时
-        "i+" : origin[4],                 //分
-        "s+" : origin[5],                 //秒
-        "S"  : origin[6]             //毫秒
-    };
-    if(/(y+)/.test(fmt)) {
-        fmt=fmt.replace(RegExp.$1, (origin[0]+"").substr(4 - RegExp.$1.length));
-    }
-    for(var k in o) {
-        if(new RegExp("("+ k +")").test(fmt)){
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+    if(json !== null && json !== undefined) {
+        var origin = json.split(/[-:. ]/);
+        var o = {
+            "m+" : origin[1],                 //月份
+            "d+" : origin[2],                    //日
+            "h+" : origin[3],                   //小时
+            "i+" : origin[4],                 //分
+            "s+" : origin[5],                 //秒
+            "S"  : origin[6]             //毫秒
+        };
+        if(/(y+)/.test(fmt)) {
+            fmt=fmt.replace(RegExp.$1, (origin[0]+"").substr(4 - RegExp.$1.length));
         }
-    }
-    return fmt;
+        for(var k in o) {
+            if(new RegExp("("+ k +")").test(fmt)){
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+            }
+        }
+        return fmt;
+    }else return null;
 }
 
 /**将一个date对象转化为指定的格式。
  */
 function fmt_dt_date(date, fmt) {
-    var o = {
-        "m+" : date.getMonth()+1,                 //月份
-        "d+" : date.getDate(),                    //日
-        "h+" : date.getHours(),                   //小时
-        "i+" : date.getMinutes(),                 //分
-        "s+" : date.getSeconds(),                 //秒
-        "S"  : date.getMilliseconds()             //毫秒
-    };
-    if(/(y+)/.test(fmt)) {
-        fmt=fmt.replace(RegExp.$1, (date.getFullYear()+"").substr(4 - RegExp.$1.length));
-    }
-    for(var k in o) {
-        if(new RegExp("("+ k +")").test(fmt)){
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+    if(date !== null) {
+        var o = {
+            "m+" : date.getMonth()+1,                 //月份
+            "d+" : date.getDate(),                    //日
+            "h+" : date.getHours(),                   //小时
+            "i+" : date.getMinutes(),                 //分
+            "s+" : date.getSeconds(),                 //秒
+            "S"  : date.getMilliseconds()             //毫秒
+        };
+        if(/(y+)/.test(fmt)) {
+            fmt=fmt.replace(RegExp.$1, (date.getFullYear()+"").substr(4 - RegExp.$1.length));
         }
-    }
-    return fmt;
+        for(var k in o) {
+            if(new RegExp("("+ k +")").test(fmt)){
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+            }
+        }
+        return fmt;
+    }else return null;
 }
 /**把datetimepicker设置视图的name转换为更直观些的数字。
  */
