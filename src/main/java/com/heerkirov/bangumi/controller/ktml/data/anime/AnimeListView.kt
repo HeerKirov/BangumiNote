@@ -32,10 +32,10 @@ class AnimeListView(@Autowired p: ConstProxy): HtmlView(WideTemplateBasic::class
             createUrl: "${proxyURL("web_data_anime_create")}",
             visibleControl: true,
             visibleGroup: [
-                {name: "常规信息", items: ["uid", "name", "series", "author", "create_time"], defaultItem: true},
+                {name: "常规信息", items: ["uid", "name", "series", "author", "tag"], defaultItem: true},
                 {name: "名称", items: ["uid", "name", "origin_name", "other_name", "keyword"]},
                 {name: "来源", items: ["uid", "name", "origin_name", "type", "series", "author"]},
-                {name: "主观评价", items: ["uid", "name", "score_like", "score_patient"]},
+                {name: "主观评价", items: ["uid", "name", "score_like", "score_patient", "tag"]},
                 {name: "制作评价", items: ["uid", "name", "make_make", "make_drama", "make_music", "make_person", "make_background"]},
                 {name: "限制级评级", items: ["uid", "name", "level_r18", "level_r18g"]},
                 {name: "更新时间", items: ["uid", "name", "create_time", "update_time"]}
@@ -50,6 +50,7 @@ class AnimeListView(@Autowired p: ConstProxy): HtmlView(WideTemplateBasic::class
                 {header: "关键字", field: "keyword", sortable: true},
                 {header: "系列", field: "series", type: "source", sortable: true, typeInfo: {subField: ["name"]}, link: function(i) {return "${proxyURL("web_data_series_detail")}" + i.id}},
                 {header: "作者", field: "author", type: "source", sortable: true, typeInfo: {many: true, subField: ["name"]}, link: function(i) {return "${proxyURL("web_data_author_detail")}" + i.id}},
+                {header: "标签", field: "tag", type: "source", sortable: true, typeInfo: {many: true, subField: ["name"]}, link: function(i) {return "${proxyURL("web_data_tag_detail")}" + i.id}},
 
                 {header: "评价:喜爱", field: "score_like", sortable: true},
                 {header: "评价:耐看", field: "score_patient", sortable: true},

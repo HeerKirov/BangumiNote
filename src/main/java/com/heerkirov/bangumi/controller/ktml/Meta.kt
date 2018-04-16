@@ -14,6 +14,7 @@ class Meta : HtmlTopView({doc(lang = "zh-cn") {
         meta(charset = "UTF-8")
         link(href = "/static/bootstrap/css/bootstrap.min.css", rel = "stylesheet")
         link(href = "/static/font-awesome/css/font-awesome.min.css", rel = "stylesheet")
+        link(href = "/static/datetimepicker/css/bootstrap-datetimepicker.min.css", rel = "stylesheet")
         script("/static/jQuery/jquery-3.3.1.min.js")
         script("/static/bootstrap/js/umd/popper.min.js")
         script("/static/bootstrap/js/umd/tooltip.min.js")
@@ -23,6 +24,7 @@ class Meta : HtmlTopView({doc(lang = "zh-cn") {
         script("/static/rest-framework/list.js")
         script("/static/rest-framework/create.js")
         script("/static/rest-framework/detail.js")
+        script("/static/datetimepicker/js/bootstrap-datetimepicker.min.js")
         meta(name = "viewport", content = "width=device-width, initial-scale=1, shrink-to-fit=no")
 
         title { block("TITLE") }

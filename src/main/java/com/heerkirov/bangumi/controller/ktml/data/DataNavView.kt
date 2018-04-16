@@ -23,9 +23,12 @@ class DataNavView(@Autowired p: ConstProxy): HtmlView(StdBasic::class, p, {
                         }
                         div(clazz = "row list-group") {
                             a_(href = proxyURL("web_data_series_list"), clazz = "list-group-item list-group-item-action") {"系列"}
+                            a_(href = proxyURL("web_data_anime_list"), clazz = "list-group-item list-group-item-action") {"番组"}
+                            a_(href = proxyURL("web_data_bangumi_list"), clazz = "list-group-item list-group-item-action") {"番剧"}
+                            a_(href = proxyURL("web_data_tag_list"), clazz = "list-group-item list-group-item-action") {"标签"}
                             a_(href = proxyURL("web_data_author_list"), clazz = "list-group-item list-group-item-action") {"作者"}
                             a_(href = proxyURL("web_data_company_list"), clazz = "list-group-item list-group-item-action") {"制作公司"}
-                            a_(href = proxyURL("web_data_anime_list"), clazz = "list-group-item list-group-item-action") {"番组"}
+
                         }
                     }
                 }

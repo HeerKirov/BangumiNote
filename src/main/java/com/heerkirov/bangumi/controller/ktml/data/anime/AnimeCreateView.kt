@@ -63,18 +63,6 @@ class AnimeCreateView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cla
                 {header: "作者", field: "author", optionFlag: true, type: "foreignChoice", typeInfo: author_type_info},
                 {header: "原作", field: "type", type: "mapping", typeInfo: {map: typeMapping, defaultValue: "origin"}},
                 {header: "关键字", field: "keyword", optionFlag: true, type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
-                "collapse:主观评价",
-                {header: "喜爱度", field: "score_like", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "耐看度", field: "score_patient", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
-                "collapse:制作评价",
-                {header: "制作", field: "make_make", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "剧本", field: "make_drama", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "音乐", field: "make_music", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "人物", field: "make_person", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "背景", field: "make_background", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
-                "collapse:限制级评级",
-                {header: "R18 评级", field: "level_r18", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "R18G评级", field: "level_r18g", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}}
             ]
         }).rest(rest.request);
     """.trimIndent()))

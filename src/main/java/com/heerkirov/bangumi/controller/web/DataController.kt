@@ -6,6 +6,12 @@ import com.heerkirov.bangumi.controller.ktml.data.series.*
 import com.heerkirov.bangumi.controller.ktml.data.author.*
 import com.heerkirov.bangumi.controller.ktml.data.company.*
 import com.heerkirov.bangumi.controller.ktml.data.anime.*
+import com.heerkirov.bangumi.controller.ktml.data.bangumi.BangumiCreateView
+import com.heerkirov.bangumi.controller.ktml.data.bangumi.BangumiDetailView
+import com.heerkirov.bangumi.controller.ktml.data.bangumi.BangumiListView
+import com.heerkirov.bangumi.controller.ktml.data.tag.TagCreateView
+import com.heerkirov.bangumi.controller.ktml.data.tag.TagDetailView
+import com.heerkirov.bangumi.controller.ktml.data.tag.TagListView
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
@@ -31,6 +37,14 @@ class DataController : HtmlController() {
     @RequestMapping("/animes/create") fun animeCreate() = servlet(AnimeCreateView::class)
     @RequestMapping("/animes/info/{id}") fun animeInfo(@PathVariable id: Int) = servlet(AnimeDetailView::class, hashMapOf<String, Any?>("id" to id))
 
+    @RequestMapping("/bangumis") fun bangumiList() = servlet(BangumiListView::class)
+    @RequestMapping("/bangumis/create") fun bangumiCreate() = servlet(BangumiCreateView::class)
+    @RequestMapping("/bangumis/info/{id}") fun bangumiInfo(@PathVariable id: Int) = servlet(BangumiDetailView::class, hashMapOf<String, Any?>("id" to id))
+
+    @RequestMapping("/tags") fun tagList() = servlet(TagListView::class)
+    @RequestMapping("/tags/create") fun tagCreate() = servlet(TagCreateView::class)
+    @RequestMapping("/tags/info/{id}") fun tagInfo(@PathVariable id: Int) = servlet(TagDetailView::class, hashMapOf<String, Any?>("id" to id))
+
     @Autowired val dataNavView: DataNavView? = null
 
     @Autowired val seriesListView: SeriesListView? = null
@@ -48,4 +62,12 @@ class DataController : HtmlController() {
     @Autowired val animeListView: AnimeListView? = null
     @Autowired val animeCreateView: AnimeCreateView? = null
     @Autowired val animeDetailView: AnimeDetailView? = null
+
+    @Autowired val bangumiListView: BangumiListView? = null
+    @Autowired val bangumiCreateView: BangumiCreateView? = null
+    @Autowired val bangumiDetailView: BangumiDetailView? = null
+
+    @Autowired val tagListView: TagListView? = null
+    @Autowired val tagCreateView: TagCreateView? = null
+    @Autowired val tagDetailView: TagDetailView? = null
 }

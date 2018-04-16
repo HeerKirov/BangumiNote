@@ -42,6 +42,12 @@ class AnimeDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cla
             showContent: function (json) { return json.name },
             link: function(json) { return "${proxyURL("web_data_author_detail")}" + json.id }
         };
+        var tag_type = {
+            many: true,
+            allowCustom: false, allowForeign: false,
+            showContent: function (json) { return json.name },
+            link: function(json) { return "${proxyURL("web_data_tag_detail")}" + json.id }
+        };
         var typeMapping = [
             {header: "小说", value: "novel"},
             {header: "漫画", value: "comic"},
@@ -65,25 +71,27 @@ class AnimeDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cla
                 {header: "作者", field: "author", type: "foreignChoice", typeInfo: author_type},
                 {header: "原作", field: "type", type: "mapping", typeInfo: {map: typeMapping}},
                 {header: "关键字", field: "keyword", type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
+                {header: "标签", field: "tag", writable: false, type: "tags", typeInfo: tag_type},
                 "collapse:主观评价",
-                {header: "喜爱度", field: "score_like", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "耐看度", field: "score_patient", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "喜爱度", field: "score_like", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "耐看度", field: "score_patient", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 "collapse:制作评价",
-                {header: "制作", field: "make_make", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "剧本", field: "make_drama", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "音乐", field: "make_music", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "人物", field: "make_person", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "背景", field: "make_background", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "制作", field: "make_make", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "剧本", field: "make_drama", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "音乐", field: "make_music", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "人物", field: "make_person", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "背景", field: "make_background", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 "collapse:限制级评级",
-                {header: "R18 评级", field: "level_r18", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "R18G评级", field: "level_r18g", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "R18 评级", field: "level_r18", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "R18G评级", field: "level_r18g", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                "end",
                 "hr",
                 {header: "条目创建时间", field: "create_time", type: "datetime", writable: false},
                 {header: "最后修改时间", field: "update_time", type: "datetime", writable: false}
             ]
         }).rest(rest).load();
     """.trimIndent()))
-    /**TODO
+    /**（已完成）
      *      1. 组件升级： Number 添加arrowButton选项，可以开启一个调整按钮。(已完成)
      *      2. 新组件： Mapping 映射。给出一组固定枚举值，放在选择框内。选择一个值，然后返回它的隐藏值。在show状态下，展示它的显值。(已完成)
      *      3. 新组件： ForeignChoice 功能复杂的内容选择器，适用于外键field。

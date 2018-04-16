@@ -27,6 +27,12 @@ class Proxy : ConstProxy({
     url("web_data_anime_list", {"/web/data/animes"})
     url("web_data_anime_create", {"/web/data/animes/create"})
     url("web_data_anime_detail", {"/web/data/animes/info/${it["id"]?:""}"})
+    url("web_data_bangumi_list", {"/web/data/bangumis"})
+    url("web_data_bangumi_create", {"/web/data/bangumis/create"})
+    url("web_data_bangumi_detail", {"/web/data/bangumis/info/${it["id"]?:""}"})
+    url("web_data_tag_list", {"/web/data/tags"})
+    url("web_data_tag_create", {"/web/data/tags/create"})
+    url("web_data_tag_detail", {"/web/data/tags/info/${it["id"]?:""}"})
     //statistics系列地址
     url("web_statistics", {"/web/statistics"})
 
@@ -44,4 +50,8 @@ class Proxy : ConstProxy({
     url("api_content_company_detail", {"/api/content/companies/${it["id"]?:""}.json"})
     url("api_content_anime", {"/api/content/animes.json"})
     url("api_content_anime_detail", {"/api/content/animes/${it["id"]?:""}.json"})
+    url("api_content_bangumi", {"/api/content/bangumis.json"})
+    url("api_content_bangumi_detail", {"/api/content/bangumis/${it["id"]?:""}.json"})
+    url("api_content_tag", {"/api/content/tags.json"})
+    url("api_content_tag_detail", {"/api/content/tags/${it["id"]?:""}.json"})
 })
