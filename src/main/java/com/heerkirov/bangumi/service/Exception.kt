@@ -12,3 +12,5 @@ class NullValueError(location: String): ServiceRuntimeException("Field '$locatio
 class NotAllowedNewModel(modelName: String, field: String): ServiceRuntimeException("'$modelName.$field' cannot be put in a new model.")
 //构成递归依赖。
 class RecursiveDependence(modelName: String, field: String): ServiceRuntimeException("'$modelName.$field' is recursive.")
+//唯一约束。
+class UniqueCheck(goal: String): ServiceRuntimeException("'$goal' is unique.")

@@ -77,6 +77,8 @@ class BangumiDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::c
                 {header: "放送话数", field: "play_quantity", type: "number", typeInfo: {min: 1, arrowButton: true, narrow: true}},
                 {header: "单话时长", field: "play_length", type: "number", typeInfo: {min: 1, arrowButton: true, narrow: true}},
                 {header: "发布时间", field: "publish_time", type: "datetime", typeInfo: {allowNull: true, format: "yyyy-mm", view: "month"}},
+                "hr",
+                {header: "单话", field: null, type: "constLink", typeInfo: {text: "所有单一话 >>", link: "${proxyURL("web_data_bangumi_episode_list", "parentId" to attrSafe("id"))}"}},
                 "collapse:观影信息",
                 {header: "看完时间", field: "finished_time", type: "datetime", typeInfo: {allowNull: true, format: "yyyy-mm-dd", view: "day"}},
                 {header: "观看中", field: "watching", type: "bool", typeInfo: {allowNull: false}},

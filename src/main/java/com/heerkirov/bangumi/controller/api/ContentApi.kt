@@ -175,7 +175,7 @@ class BangumiApi(@Autowired private val bangumiService: BangumiService): UserBel
     private val animeSubConverter: ModelConverter<Anime> = IdConverter(Anime::class, arrayOf(
             ModelConverter.Field("id", allowToObject = false, converter = IntConverter()),
             ModelConverter.Field("uid", allowToObject = false, converter = IntConverter()),
-            ModelConverter.Field("name", notBlank = true, converter = StringConverter())
+            ModelConverter.Field("name", allowToObject = false, converter = StringConverter())
     ))
     private val companySubConverter: ModelConverter<Company> = IdConverter(Company::class, arrayOf(
             ModelConverter.Field("id", allowToObject = false, converter = IntConverter()),
@@ -275,7 +275,7 @@ class TagApi(@Autowired private val tagService: TagService): UserBelongRestfulCo
     private val parentSubConverter: ModelConverter<Tag> = IdConverter(Tag::class, arrayOf(
             ModelConverter.Field("id", allowToObject = false, converter = IntConverter()),
             ModelConverter.Field("uid", allowToObject = false, converter = IntConverter()),
-            ModelConverter.Field("name", notBlank = true, converter = StringConverter())
+            ModelConverter.Field("name", allowToObject = false, converter = StringConverter())
     ))
     override val converter: ModelConverter<Tag> = ModelConverter(Tag::class, arrayOf(
             ModelConverter.Field("id", allowToObject = false, converter = IntConverter()),
@@ -286,7 +286,7 @@ class TagApi(@Autowired private val tagService: TagService): UserBelongRestfulCo
             ModelConverter.Field("createTime", jsonName = "create_time", allowToObject = false, converter = DateTimeConverter()),
             ModelConverter.Field("updateTime", jsonName = "update_time", allowToObject = false, converter = DateTimeConverter())
     ))
-    override val filter: Filter = Filter(searchMap = arrayOf("name, description"),
+    override val filter: Filter = Filter(searchMap = arrayOf("name", "description"),
             orderMap = arrayOf(
                     Filter.OrderField("id"),
                     Filter.OrderField("uid"),
@@ -315,7 +315,7 @@ class EpisodeApi(@Autowired private val episodeService: EpisodeService): UserBel
             ModelConverter.Field("createTime", jsonName = "create_time", allowToObject = false, converter = DateTimeConverter()),
             ModelConverter.Field("updateTime", jsonName = "update_time", allowToObject = false, converter = DateTimeConverter())
     ))
-    override val filter: Filter = Filter(searchMap = arrayOf("name, description"),
+    override val filter: Filter = Filter(searchMap = arrayOf("name"),
             orderMap = arrayOf(
                     Filter.OrderField("id"),
                     Filter.OrderField("uid"),

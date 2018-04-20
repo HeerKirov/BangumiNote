@@ -50,7 +50,7 @@ function purl_param(params) {
     if(params!==null&&params.length>0){
         var ret = "";
         var first = true;
-        for(k = 1; k< params.length; ++k) {
+        for(var k = 1; k< params.length; ++k) {
             var p = params[k];
             for(var i in p) {
                 if(first)first = false;else ret += "&";
@@ -69,6 +69,40 @@ function purl_param(params) {
     }else return null;
 }
 
+/**计算两个日期之间的周数差。
+ * @param dateA
+ * @param dateB
+ */
+function week_minus(dateA, dateB) {
+    return Math.floor((get_weekday_first(dateA)-get_weekday_first(dateB))/(60*60*24*1000*7));
+}
+
+/**获得该日期所在周的第一天（周一）。
+ * @param date
+ */
+function get_weekday_first(date) {
+    var ret = new Date(date);
+    var weekday = ret.getDay();
+    if(weekday === 0) ret.setDate(date.getDate() - 6);
+    else ret.setDate(date.getDate() - (weekday - 1));
+    ret.setHours(0, 0, 0, 0);
+    return ret;
+}
+
+/**将一个周数日期转换为[周X]的形式.
+ * @param number
+ */
+function weekday_name(number) {
+    switch(number) {
+        case 0: return "周日";
+        case 1: return "周一";
+        case 2: return "周二";
+        case 3: return "周三";
+        case 4: return "周四";
+        case 5: return "周五";
+        case 6: return "周六";
+    }
+}
 /**将一个从json得到的y-m-d h:min:s.ms字串格式化为指定的格式。
  */
 function fmt_dt_json(json, fmt) {

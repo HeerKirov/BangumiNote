@@ -97,6 +97,28 @@ class DateTimeConverter : AbstractConverter<Calendar, String>(Calendar::class) {
         return (goal as Calendar).toNumber().toString()
     }
 }
+class DateTimeStringConverter : AbstractConverter<String, String>(String::class) {
+    override fun new(json: Any): String {
+        val data = validateNew(json)
+        return data.toDateTimeNumber().toString()
+    }
+
+    override fun update(json: Any, goal: Any): String {
+        return new(json)
+    }
+
+    override fun validateNew(json: Any): String {
+        return json.toString()
+    }
+
+    override fun validateUpdate(json: Any): String {
+        return validateNew(json)
+    }
+
+    override fun parse(goal: Any): Any {
+        return (goal as String).toDateTimeNumber().toString()
+    }
+}
 
 //适用于带内部代换的数组结构的转换器。
 class ListConverter<T>(private val subClazz: KClass<T>, val notNull: Boolean = true, private val converter: AbstractConverter<T, *>? = null): AbstractConverter<List<T?>, List<Any?>>(List::class as KClass<List<T?>>) where T: Any {

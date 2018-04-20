@@ -6,7 +6,7 @@ import com.heerkirov.bangumi.dao.QueryAllStruct
 import com.heerkirov.bangumi.dao.QueryFeature
 import com.heerkirov.bangumi.model.Bangumi
 import com.heerkirov.bangumi.model.Episode
-import com.heerkirov.bangumi.model.Series
+import com.heerkirov.bangumi.model.Diary
 import com.heerkirov.bangumi.model.User
 import org.hibernate.criterion.Restrictions
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +21,10 @@ class EpisodeServiceImpl(@Autowired private val dao: Dao) : EpisodeService {
             obj.obj.userBelongId = user.incUid(Episode::class)
             this.update(user) //提交user的更改。
             this.create(obj.obj)
+            //更改diary的配置
+            val bangumi = this.query(Bangumi::class).where(Restrictions.eq("id", obj.obj.bangumi_id)).first()!!
+            DiaryServiceImpl.analysisEpisodes(this.query(Diary::class).where(Restrictions.eq("bangumi", bangumi)).first(),
+                    this.query(Episode::class).where(Restrictions.eq("bangumi_id", bangumi.id)).all())
             ServiceSet(obj.obj)
         }
     }
@@ -28,12 +32,22 @@ class EpisodeServiceImpl(@Autowired private val dao: Dao) : EpisodeService {
     override fun update(obj: ServiceSet<Episode>, appendItem: Set<String>?): ServiceSet<Episode> {
         return dao.dao<ServiceSet<Episode>> {
             this.update(obj.obj)
+            //更改diary的配置
+            val bangumi = this.query(Bangumi::class).where(Restrictions.eq("id", obj.obj.bangumi_id)).first()!!
+            DiaryServiceImpl.analysisEpisodes(this.query(Diary::class).where(Restrictions.eq("bangumi", bangumi)).first(),
+                    this.query(Episode::class).where(Restrictions.eq("bangumi_id", bangumi.id)).all())
             ServiceSet(obj.obj)
         }
     }
 
     override fun delete(obj: ServiceSet<Episode>, appendItem: Set<String>?) {
-        dao.dao { this.delete(obj.obj) }
+        dao.dao {
+            val bangumi = this.query(Bangumi::class).where(Restrictions.eq("id", obj.obj.bangumi_id)).first()!!
+            this.delete(obj.obj)
+            //更改diary的配置
+            DiaryServiceImpl.analysisEpisodes(this.query(Diary::class).where(Restrictions.eq("bangumi", bangumi)).first(),
+                    this.query(Episode::class).where(Restrictions.eq("bangumi_id", bangumi.id)).all())
+        }
     }
 
     override fun queryList(feature: QueryFeature?, appendItem: Set<String>?): QueryAllStruct<ServiceSet<Episode>> {

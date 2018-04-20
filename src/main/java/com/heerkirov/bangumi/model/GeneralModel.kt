@@ -1,7 +1,10 @@
 package com.heerkirov.bangumi.model
 
+import com.heerkirov.bangumi.model.base.ArrayType
 import com.heerkirov.bangumi.model.base.Model
 import com.heerkirov.bangumi.model.base.UBModel
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
 import java.util.*
 import javax.persistence.*
 import kotlin.collections.ArrayList
@@ -166,17 +169,24 @@ class Tag(
         @Column(name = "update_time", nullable = false)var updateTime: Calendar? = null
 ): UBModel()
 
-
+@Entity @Table(name = "public.diary")
+@TypeDef(name = "array", typeClass = ArrayType::class)
 class Diary(
-        var id: Int? = null,
-        var uid: Int? = null,
-        var bangumi: Bangumi? = null,
-        var name: String = "",
+        @Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="DIARY_ID_SEQ")
+        @SequenceGenerator(name="DIARY_ID_SEQ", sequenceName="diary_id_seq", allocationSize = 1)
+        @Column(name = "id")var id: Int? = null,
+        @Column(name = "uid", nullable = false)var uid: Int? = null,
+        @ManyToOne@JoinColumn(name = "bangumi_id", unique = true) var bangumi: Bangumi? = null,
+        @Column(name = "name")var name: String = "",
 
-        var totalEpisode: Int? = null,
-        var publishEpisode: Int? = null,
-        var hibekitmanEpisode: Int? = null,
+        @Column(name = "total_episode", nullable = false)var totalEpisode: Int? = null,
+        @Column(name = "publish_episode", nullable = false)var publishEpisode: Int? = null,
+        @Column(name = "finished_episode", nullable = false)var finishedEpisode: Int? = null,
 
-        var isCompleted: Boolean = false,
-        var publishPlan: List<Calendar> = ArrayList()
-)
+        @Column(name = "is_completed", nullable = false)var completed: Boolean = false,
+        @Column(name = "publish_plan", nullable = false)@Type(type = "array")var publishPlan: List<String> = ArrayList(), //Calendar
+
+        @Column(name = "user_id", nullable = false) var userId: String? = null,
+        @Column(name = "create_time", nullable = false)var createTime: Calendar? = null,
+        @Column(name = "update_time", nullable = false)var updateTime: Calendar? = null
+): UBModel()

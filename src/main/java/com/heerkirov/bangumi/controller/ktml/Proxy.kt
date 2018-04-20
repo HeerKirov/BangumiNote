@@ -15,7 +15,7 @@ class Proxy : ConstProxy({
     //home系列地址
     url("web_home", {"/web/home"})
     //diary系列地址
-    url("web_diary", {"/web/diary"})
+    url("web_diary", {"/web/diaries"})
     //data系列地址
     url("web_data", {"/web/data"})
     url("web_data_series_list", {"/web/data/series"})
@@ -33,6 +33,9 @@ class Proxy : ConstProxy({
     url("web_data_bangumi_list", {"/web/data/bangumis"})
     url("web_data_bangumi_create", {"/web/data/bangumis/create"})
     url("web_data_bangumi_detail", {"/web/data/bangumis/info/${it["id"]?:""}"})
+    url("web_data_bangumi_episode_list", {"/web/data/bangumis/info/${it["parentId"]?:""}/episodes"})
+    url("web_data_bangumi_episode_create", {"/web/data/bangumis/info/${it["parentId"]?:""}/episodes/create"})
+    url("web_data_bangumi_episode_detail", {"/web/data/bangumis/info/${it["parentId"]?:""}/episodes/info/${it["id"]?:""}"})
     url("web_data_tag_list", {"/web/data/tags"})
     url("web_data_tag_create", {"/web/data/tags/create"})
     url("web_data_tag_detail", {"/web/data/tags/info/${it["id"]?:""}"})
@@ -46,6 +49,9 @@ class Proxy : ConstProxy({
     url("api_user_register", {"/api/user/register.json"})
     url("api_user_current", {"/api/user/current.json"})
     url("api_user_password", {"/api/user/password.json"})
+    //diary系列api
+    url("api_diary", {"/api/diaries.json"})
+    url("api_diary_detail", {"/api/diaries/${it["id"]?:""}.json"})
     //content系列api
     url("api_content_series", {"/api/content/series.json"})
     url("api_content_series_detail", {"/api/content/series/${it["id"]?:""}.json"})
@@ -57,8 +63,8 @@ class Proxy : ConstProxy({
     url("api_content_anime_detail", {"/api/content/animes/${it["id"]?:""}.json"})
     url("api_content_bangumi", {"/api/content/bangumis.json"})
     url("api_content_bangumi_detail", {"/api/content/bangumis/${it["id"]?:""}.json"})
-    url("api_content_bangumi_episode", {"/api/content/bangumis/${it["parentId"]?:""}/episode.json"})
-    url("api_content_bangumi_episode_detail", {"/api/content/bangumis/${it["parentId"]?:""}/episode/${it["id"]?:""}.json"})
+    url("api_content_bangumi_episode", {"/api/content/bangumis/${it["parentId"]?:""}/episodes.json"})
+    url("api_content_bangumi_episode_detail", {"/api/content/bangumis/${it["parentId"]?:""}/episodes/${it["id"]?:""}.json"})
     url("api_content_tag", {"/api/content/tags.json"})
     url("api_content_tag_detail", {"/api/content/tags/${it["id"]?:""}.json"})
 })

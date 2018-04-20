@@ -6,7 +6,6 @@ import org.hibernate.Criteria
 import org.hibernate.HibernateException
 import org.hibernate.Session
 import org.hibernate.criterion.*
-import org.hibernate.transform.ResultTransformer
 import java.io.Serializable
 import kotlin.reflect.KClass
 

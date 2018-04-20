@@ -9,6 +9,16 @@ interface OptionalService {
 }
 
 @Service
+interface MessageService {
+    fun publishGeneral(lists: List<GeneralInfo>): List<Message>
+
+    fun publishDiaryPublish(lists: List<DiaryPublishInfo>): List<Message>
+
+    class GeneralInfo(val user: User, val title: String, val content: String)
+    class DiaryPublishInfo(val diary: Diary, val oldCount: Int, val newCount: Int)
+}
+
+@Service
 interface UserService : RestfulService<User>
 
 @Service
@@ -31,3 +41,11 @@ interface EpisodeService: RestfulService<Episode>
 
 @Service
 interface TagService: RestfulService<Tag>
+
+@Service
+interface DiaryService: RestfulService<Diary> {
+    fun analysisPlan(): List<MessageService.DiaryPublishInfo>
+
+
+}
+

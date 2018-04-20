@@ -12,9 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class BangumiServiceImpl(@Autowired val dao: Dao): BangumiService {
     /*TODO 接下来要做的
-        5. 创建tag相关api和页面。
         6. 想一个方案，使bangumi在update时，能够有选择地更新anime的commit，而不是一股脑全更新了。
-        7. 添加新的前端控件，用于处理布尔值。
     */
     override fun create(obj: ServiceSet<Bangumi>, appendItem: Set<String>?): ServiceSet<Bangumi> {
         return dao.dao<ServiceSet<Bangumi>> {
@@ -46,6 +44,13 @@ class BangumiServiceImpl(@Autowired val dao: Dao): BangumiService {
             //处理company的附加问题。
             mappingSetTreat(obj.obj, "companyList", Company::class, user)
             mappingSetTreat(obj.obj, "tagList", Tag::class, user)
+            //处理diary的附加问题
+            val diary = this.query(Diary::class).where(Restrictions.eq("bangumi", obj.obj)).first()
+            if(diary != null) {
+                diary.name = obj.obj.name
+                diary.totalEpisode = obj.obj.playQuantity
+                this.update(diary)
+            }
             this.update(obj.obj)
             //处理commit
             analysisCommit(obj.obj.anime!!)

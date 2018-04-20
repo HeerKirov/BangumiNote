@@ -24,6 +24,7 @@ class Meta : HtmlTopView({doc(lang = "zh-cn") {
         script("/static/rest-framework/list.js")
         script("/static/rest-framework/create.js")
         script("/static/rest-framework/detail.js")
+        script("/static/rest-framework/diary.js")
         script("/static/datetimepicker/js/bootstrap-datetimepicker.min.js")
         meta(name = "viewport", content = "width=device-width, initial-scale=1, shrink-to-fit=no")
 

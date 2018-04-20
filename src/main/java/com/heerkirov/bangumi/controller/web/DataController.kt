@@ -9,6 +9,9 @@ import com.heerkirov.bangumi.controller.ktml.data.anime.*
 import com.heerkirov.bangumi.controller.ktml.data.bangumi.BangumiCreateView
 import com.heerkirov.bangumi.controller.ktml.data.bangumi.BangumiDetailView
 import com.heerkirov.bangumi.controller.ktml.data.bangumi.BangumiListView
+import com.heerkirov.bangumi.controller.ktml.data.bangumi.episode.EpisodeCreateView
+import com.heerkirov.bangumi.controller.ktml.data.bangumi.episode.EpisodeDetailView
+import com.heerkirov.bangumi.controller.ktml.data.bangumi.episode.EpisodeListView
 import com.heerkirov.bangumi.controller.ktml.data.tag.TagCreateView
 import com.heerkirov.bangumi.controller.ktml.data.tag.TagDetailView
 import com.heerkirov.bangumi.controller.ktml.data.tag.TagListView
@@ -41,6 +44,10 @@ class DataController : HtmlController() {
     @RequestMapping("/bangumis/create") fun bangumiCreate() = servlet(BangumiCreateView::class)
     @RequestMapping("/bangumis/info/{id}") fun bangumiInfo(@PathVariable id: Int) = servlet(BangumiDetailView::class, hashMapOf<String, Any?>("id" to id))
 
+    @RequestMapping("/bangumis/info/{parentId}/episodes") fun episodeList(@PathVariable parentId: Int) = servlet(EpisodeListView::class, hashMapOf<String, Any?>("parentId" to parentId))
+    @RequestMapping("/bangumis/info/{parentId}/episodes/create") fun episodeCreate(@PathVariable parentId: Int) = servlet(EpisodeCreateView::class, hashMapOf<String, Any?>("parentId" to parentId))
+    @RequestMapping("/bangumis/info/{parentId}/episodes/info/{id}") fun episodeInfo(@PathVariable parentId: Int, @PathVariable id: Int) = servlet(EpisodeDetailView::class, hashMapOf<String, Any?>("parentId" to parentId, "id" to id))
+
     @RequestMapping("/tags") fun tagList() = servlet(TagListView::class)
     @RequestMapping("/tags/create") fun tagCreate() = servlet(TagCreateView::class)
     @RequestMapping("/tags/info/{id}") fun tagInfo(@PathVariable id: Int) = servlet(TagDetailView::class, hashMapOf<String, Any?>("id" to id))
@@ -66,6 +73,10 @@ class DataController : HtmlController() {
     @Autowired val bangumiListView: BangumiListView? = null
     @Autowired val bangumiCreateView: BangumiCreateView? = null
     @Autowired val bangumiDetailView: BangumiDetailView? = null
+
+    @Autowired val episodeListView: EpisodeListView? = null
+    @Autowired val episodeCreateView: EpisodeCreateView? = null
+    @Autowired val episodeDetailView: EpisodeDetailView? = null
 
     @Autowired val tagListView: TagListView? = null
     @Autowired val tagCreateView: TagCreateView? = null
