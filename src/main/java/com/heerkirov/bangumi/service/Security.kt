@@ -11,7 +11,8 @@ import javax.servlet.http.HttpSession
 
 @Service
 class Security(@Autowired private val session: HttpSession,
-               @Autowired private val userService: UserService) {
+               @Autowired private val userService: UserService,
+               @Autowired private val securitySalt: SecuritySalt) {
 
     fun permit(isAuthenticated: Boolean = false, userId: String? = null, isAdmin: Boolean = false): Boolean {
         if(isAuthenticated){//有登录要求
@@ -38,8 +39,8 @@ class Security(@Autowired private val session: HttpSession,
             val code = String(Base64.getDecoder().decode(base64Code.split(' ').last()))
             val auth = code.split(Pattern.compile(":"), 2)
             if(auth.size>=2) {
-                val ret = userService.queryFirst(QueryFeature().addWhere(and(eq("id", auth[0]), eq("password", auth[1]))))
-                if(session.getAttribute("user")==null&&ret!=null){
+                val ret = userService.queryFirst(QueryFeature().addWhere(and(eq("id", auth[0]))))
+                if(session.getAttribute("user")==null&&ret!=null&&securitySalt.checkPasword(ret.obj, auth[1])){
                     ret.let {
                         it.obj.lastLogin = Calendar.getInstance()
                         userService.update(it)
@@ -71,8 +72,8 @@ class Security(@Autowired private val session: HttpSession,
         }
     }
     fun doLogin(username: String, password: String): Boolean {
-        val ret = userService.queryFirst(QueryFeature().addWhere(and(eq("id", username), eq("password", password))))
-        if(ret!=null){
+        val ret = userService.queryFirst(QueryFeature().addWhere(and(eq("id", username))))
+        if(ret!=null&&securitySalt.checkPasword(ret.obj, password)){
             ret.let {
                 it.obj.lastLogin = Calendar.getInstance()
                 userService.update(it)
@@ -101,6 +102,7 @@ class Security(@Autowired private val session: HttpSession,
                 it.updateFieldTime = Calendar.getInstance()
                 it.lastLogin = Calendar.getInstance()
             }
+            securitySalt.setPassword(user, user.password)
             userService.create(ServiceSet(user))
             return true
         }
@@ -108,8 +110,8 @@ class Security(@Autowired private val session: HttpSession,
 
     fun changePassword(oldPassword: String, newPassword: String): Boolean {
         val user = currentUser()
-        if(user!=null&&user.password == oldPassword) {
-            user.password = newPassword
+        if(user!=null&&securitySalt.checkPasword(user, oldPassword)) {
+            securitySalt.setPassword(user, newPassword)
             userService.update(ServiceSet(user))
             return true
         }else{
@@ -125,4 +127,6 @@ class Security(@Autowired private val session: HttpSession,
             return session.getAttribute("user") as User?
         }
     }
+
+
 }

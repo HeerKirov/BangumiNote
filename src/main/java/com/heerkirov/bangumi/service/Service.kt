@@ -46,6 +46,7 @@ interface TagService: RestfulService<Tag>
 interface DiaryService: RestfulService<Diary> {
     fun analysisPlan(): List<MessageService.DiaryPublishInfo>
 
+    fun handleFinished(obj: Diary): Diary
 
 }
 

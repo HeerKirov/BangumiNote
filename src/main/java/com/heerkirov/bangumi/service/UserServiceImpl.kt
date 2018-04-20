@@ -5,10 +5,11 @@ import com.heerkirov.bangumi.model.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
+import javax.annotation.PostConstruct
 
 
 @Component
-class UserServiceImpl(@Autowired private val dao: Dao): UserService {
+class UserServiceImpl(@Autowired private val dao: Dao, @Autowired private val securitySalt: SecuritySalt): UserService {
     override fun create(obj: ServiceSet<User>, appendItem: Set<String>?): ServiceSet<User> {
         return dao.dao<ServiceSet<User>> {
             this.create(obj.obj)
@@ -57,5 +58,18 @@ class UserServiceImpl(@Autowired private val dao: Dao): UserService {
 
     override fun queryExists(feature: QueryFeature?): Boolean {
         return dao.dao<Boolean> { this.query(User::class).feature(feature).exists() }
+    }
+
+    @PostConstruct
+    private fun analyseCleatTextPassword() {
+        dao.dao {
+            val users = this.query(com.heerkirov.bangumi.model.User::class).all()
+            for(user in users) {
+                if(user.salt.isBlank()) {
+                    securitySalt.setPassword(user, user.password)
+                    this.update(user)
+                }
+            }
+        }
     }
 }
