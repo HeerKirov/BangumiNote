@@ -4,6 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/context
@@ -11,8 +12,11 @@
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
        http://www.springframework.org/schema/tx
-       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task.xsd">
     <context:property-placeholder location="classpath:jdbc.properties" system-properties-mode="FALLBACK"/>
+    <task:annotation-driven />
     <mvc:annotation-driven/>
     <mvc:resources mapping="/static/**" location="/static/"/>
     <context:annotation-config/>
@@ -20,7 +24,7 @@
     <context:component-scan base-package="com.heerkirov.bangumi.model"/>
     <context:component-scan base-package="com.heerkirov.bangumi.dao"/>
     <context:component-scan base-package="com.heerkirov.bangumi.service"/>
-    <context:component-scan base-package="com.heerkirov.bangumi.util"/>
+    <context:component-scan base-package="com.heerkirov.bangumi.task"/>
     <!--<bean class="com.heerkirov.bangumi.config.DispatcherConfig"/>-->
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/jsp/"/>
@@ -46,6 +50,8 @@
                 <value>com.heerkirov.bangumi.model.Bangumi</value>
                 <value>com.heerkirov.bangumi.model.Episode</value>
                 <value>com.heerkirov.bangumi.model.Tag</value>
+                <value>com.heerkirov.bangumi.model.Diary</value>
+                <value>com.heerkirov.bangumi.model.Message</value>
             </list>
         </property>
     </bean>
