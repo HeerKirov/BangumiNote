@@ -286,6 +286,49 @@ ALTER SEQUENCE company_to_bangumi_id_seq OWNED BY company_to_bangumi.id;
 
 
 --
+-- Name: diary; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE diary (
+    id integer NOT NULL,
+    uid integer NOT NULL,
+    bangumi_id integer NOT NULL,
+    name character varying(128) NOT NULL,
+    total_episode integer NOT NULL,
+    publish_episode integer NOT NULL,
+    finished_episode integer NOT NULL,
+    is_completed boolean NOT NULL,
+    publish_plan character varying(64)[] NOT NULL,
+    user_id character varying(16) NOT NULL,
+    create_time timestamp without time zone NOT NULL,
+    update_time timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE diary OWNER TO heer;
+
+--
+-- Name: diary_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE diary_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE diary_id_seq OWNER TO heer;
+
+--
+-- Name: diary_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE diary_id_seq OWNED BY diary.id;
+
+
+--
 -- Name: episode; Type: TABLE; Schema: public; Owner: heer
 --
 
@@ -324,6 +367,45 @@ ALTER TABLE episode_id_seq OWNER TO heer;
 --
 
 ALTER SEQUENCE episode_id_seq OWNED BY episode.id;
+
+
+--
+-- Name: message; Type: TABLE; Schema: public; Owner: heer
+--
+
+CREATE TABLE message (
+    id integer NOT NULL,
+    uid integer NOT NULL,
+    type character varying(16) NOT NULL,
+    content json DEFAULT '{}'::json NOT NULL,
+    user_id character varying(16) NOT NULL,
+    create_time timestamp without time zone NOT NULL,
+    update_time timestamp without time zone NOT NULL,
+    have_read boolean NOT NULL
+);
+
+
+ALTER TABLE message OWNER TO heer;
+
+--
+-- Name: message_id_seq; Type: SEQUENCE; Schema: public; Owner: heer
+--
+
+CREATE SEQUENCE message_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE message_id_seq OWNER TO heer;
+
+--
+-- Name: message_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: heer
+--
+
+ALTER SEQUENCE message_id_seq OWNED BY message.id;
 
 
 --
@@ -564,10 +646,24 @@ ALTER TABLE ONLY company_to_bangumi ALTER COLUMN id SET DEFAULT nextval('company
 
 
 --
+-- Name: diary id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY diary ALTER COLUMN id SET DEFAULT nextval('diary_id_seq'::regclass);
+
+
+--
 -- Name: episode id; Type: DEFAULT; Schema: public; Owner: heer
 --
 
 ALTER TABLE ONLY episode ALTER COLUMN id SET DEFAULT nextval('episode_id_seq'::regclass);
+
+
+--
+-- Name: message id; Type: DEFAULT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY message ALTER COLUMN id SET DEFAULT nextval('message_id_seq'::regclass);
 
 
 --
@@ -703,8 +799,8 @@ SELECT pg_catalog.setval('author_to_anime_id_seq', 34, true);
 --
 
 COPY bangumi (id, uid, name, serial, anime_id, publish_time, play_type, play_length, play_quantity, finished_time, watching, multiple_time, seen_the_original, user_id, create_time, update_time, score_like, score_patient, make_make, make_drama, make_music, make_person, make_background, level_r18, level_r18g) FROM stdin;
-2	2	魔法禁书目录第2季	2	16	2013-10-01 16:24:28	tv	24	24	2014-08-21 16:24:28	t	f	t	heerkirov	2018-04-16 16:26:13.49	2018-04-16 16:26:13.49	5	4	\N	\N	\N	\N	\N	\N	\N
-1	1	魔法禁书目录	1	16	\N	tv	24	24	2014-08-13 16:22:46	t	t	t	heerkirov	2018-04-16 11:26:13.186	2018-04-16 19:20:29.463	5	\N	\N	\N	\N	\N	\N	\N	\N
+1	1	魔法禁书目录第1季	1	16	\N	tv	24	24	\N	t	t	t	heerkirov	2018-04-16 11:26:13.186	2018-04-16 19:20:29.463	5	\N	\N	\N	\N	\N	\N	\N	\N
+2	2	魔法禁书目录第2季	2	16	2013-10-01 16:24:28	tv	24	24	\N	t	f	t	heerkirov	2018-04-16 16:26:13.49	2018-04-16 16:26:13.49	5	4	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -750,11 +846,31 @@ SELECT pg_catalog.setval('company_to_bangumi_id_seq', 14, true);
 
 
 --
+-- Data for Name: diary; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY diary (id, uid, bangumi_id, name, total_episode, publish_episode, finished_episode, is_completed, publish_plan, user_id, create_time, update_time) FROM stdin;
+2	2	1	魔法禁书目录第1季	24	15	12	f	{"2018-4-21 22:25:0.0","2018-4-28 22:25:0.0","2018-5-5 22:25:0.0","2018-5-12 22:25:0.0","2018-5-19 22:25:0.0","2018-5-26 22:25:0.0","2018-6-2 22:25:0.0","2018-6-9 22:25:0.0","2018-6-16 22:25:0.0"}	heerkirov	2018-04-18 15:06:39.336	2018-04-20 14:29:15.404
+3	3	2	魔法禁书目录第2季	24	9	3	f	{"2018-4-21 1:0:0.0","2018-4-28 1:0:0.0"}	heerkirov	2018-04-18 15:18:55.789	2018-04-20 14:29:31.539
+\.
+
+
+--
+-- Name: diary_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('diary_id_seq', 3, true);
+
+
+--
 -- Data for Name: episode; Type: TABLE DATA; Schema: public; Owner: heer
 --
 
 COPY episode (id, uid, bangumi_id, serial, name, publish_time, finished_time, user_id, create_time, update_time) FROM stdin;
-3	8	1	1	1	\N	2014-08-12 00:00:00	heerkirov	2018-04-16 21:37:24.322	2018-04-16 21:39:29.372
+6	3	2	1	第一话	2018-01-01 15:16:21	2018-01-02 15:16:21	heerkirov	2018-04-18 15:16:36.64	2018-04-18 15:16:36.64
+9	6	2	4	第四话	2018-01-22 15:19:09	\N	heerkirov	2018-04-18 15:19:16.628	2018-04-18 15:19:16.628
+7	4	2	2	第二话	2018-01-08 15:16:39	2018-04-18 15:19:52.173	heerkirov	2018-04-18 15:16:51.669	2018-04-18 15:16:51.669
+8	5	2	3	第三话	2018-01-15 15:16:53	2018-04-18 15:20:05.9	heerkirov	2018-04-18 15:17:04.166	2018-04-18 15:17:04.166
 \.
 
 
@@ -762,7 +878,24 @@ COPY episode (id, uid, bangumi_id, serial, name, publish_time, finished_time, us
 -- Name: episode_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
 --
 
-SELECT pg_catalog.setval('episode_id_seq', 3, true);
+SELECT pg_catalog.setval('episode_id_seq', 9, true);
+
+
+--
+-- Data for Name: message; Type: TABLE DATA; Schema: public; Owner: heer
+--
+
+COPY message (id, uid, type, content, user_id, create_time, update_time, have_read) FROM stdin;
+1	1	diary_publish	{"name":"魔法禁书目录第2季","old_count":6,"bangumi_id":2,"new_count":8,"diary_id":3}	heerkirov	2018-04-18 17:30:00.228	2018-04-18 17:30:00.228	f
+2	2	diary_publish	{"name":"魔法禁书目录第2季","old_count":8,"bangumi_id":2,"new_count":9,"diary_id":3}	heerkirov	2018-04-20 14:30:00.128	2018-04-20 14:30:00.128	f
+\.
+
+
+--
+-- Name: message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: heer
+--
+
+SELECT pg_catalog.setval('message_id_seq', 2, true);
 
 
 --
@@ -891,7 +1024,7 @@ COPY "user" (id, name, password, is_admin, create_time, update_time, last_login,
 user1	AAA	1234	f	2018-03-30 08:22:52.604503	2018-03-30 08:22:52.735447	2018-03-30 08:22:52.844421	{}
 user2	user2	123456	f	2018-03-30 08:22:52.604503	2018-03-30 08:22:52.735447	2018-03-30 08:22:52.844421	{}
 alice	ALICE&ALICE	pw	f	2018-03-30 08:22:52.604	2018-03-30 08:22:52.735	2018-04-08 20:43:03.443	{}
-heerkirov	Heer Kirov	123	f	2018-03-30 08:22:52.604	2018-03-30 08:22:52.735	2018-04-16 21:33:04.771	{"Series":9,"Company":3,"Anime":17,"Author":28,"Bangumi":3,"Tag":5}
+heerkirov	Heer Kirov	123	f	2018-03-30 08:22:52.604	2018-03-30 08:22:52.735	2018-04-20 14:58:25.203	{"Series":9,"Episode":7,"Company":3,"Anime":17,"Message":3,"Author":28,"Bangumi":3,"Tag":5,"Diary":4}
 \.
 
 
@@ -944,11 +1077,27 @@ ALTER TABLE ONLY company_to_bangumi
 
 
 --
+-- Name: diary diary_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY diary
+    ADD CONSTRAINT diary_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: episode episode_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
 --
 
 ALTER TABLE ONLY episode
     ADD CONSTRAINT episode_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: message message_pkey; Type: CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY message
+    ADD CONSTRAINT message_pkey PRIMARY KEY (id);
 
 
 --
@@ -997,6 +1146,13 @@ ALTER TABLE ONLY tag_to_bangumi
 
 ALTER TABLE ONLY "user"
     ADD CONSTRAINT user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: diary_bangumi_id_uindex; Type: INDEX; Schema: public; Owner: heer
+--
+
+CREATE UNIQUE INDEX diary_bangumi_id_uindex ON diary USING btree (bangumi_id);
 
 
 --
@@ -1080,6 +1236,22 @@ ALTER TABLE ONLY company_to_bangumi
 
 
 --
+-- Name: diary diary_bangumi_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY diary
+    ADD CONSTRAINT diary_bangumi_id_fk FOREIGN KEY (bangumi_id) REFERENCES bangumi(id) ON DELETE CASCADE;
+
+
+--
+-- Name: diary diary_user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY diary
+    ADD CONSTRAINT diary_user_id_fk FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
+
+
+--
 -- Name: episode episode_bangumi_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
 --
 
@@ -1093,6 +1265,14 @@ ALTER TABLE ONLY episode
 
 ALTER TABLE ONLY episode
     ADD CONSTRAINT episode_user_id_fk FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: message message_user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: heer
+--
+
+ALTER TABLE ONLY message
+    ADD CONSTRAINT message_user_id_fk FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
 
 
 --
