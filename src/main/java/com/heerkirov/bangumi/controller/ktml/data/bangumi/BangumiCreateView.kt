@@ -73,7 +73,7 @@ class BangumiCreateView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::c
                 {header: "看完时间", field: "finished_time", optionFlag: true, type: "datetime", typeInfo: {allowNull: true, format: "yyyy-mm-dd", view: "day"}},
                 {header: "观看中", field: "watching", type: "bool", defaultValue: false, typeInfo: {allowNull: false}},
                 {header: "二刷", field: "multiple_time", type: "bool", defaultValue: false, typeInfo: {allowNull: false}},
-                {header: "看过原作", field: "seen_the_original", bool: "text", defaultValue: false, typeInfo: {allowNull: false}},
+                {header: "看过原作", field: "seen_the_original", type: "bool", defaultValue: false, typeInfo: {allowNull: false}},
                 "collapse:主观评价",
                 {header: "喜爱度", field: "score_like", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},
                 {header: "耐看度", field: "score_patient", optionFlag: true, type: "number", typeInfo: {narrow: true, arrowButton: true, min: 0, max: 10, allowBlank: true, allowNull: true}},

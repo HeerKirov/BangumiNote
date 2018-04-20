@@ -3,7 +3,7 @@ package com.heerkirov.ktml.builder
 import com.heerkirov.ktml.element.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
-/**TODO 新的重构内容：
+/**TODO 新的重构内容
     现在内容的生成模式为：
         获取上一级页面的内容 & 块引用
         调用initialize - 调用init构造 - 填充上一级的块 - DFS搜索block块引用 - 连同内容传递给下一级。

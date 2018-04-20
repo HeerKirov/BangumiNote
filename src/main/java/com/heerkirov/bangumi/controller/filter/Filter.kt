@@ -15,7 +15,6 @@ import kotlin.reflect.KClass
     3. 在query时，提供排序功能。提供一个带ASC/DESC的字段列表，根据列表进行优先级排序。
     4. 在返回数组结果时，套用内容，自动根据参数进行分页。分页参数有两个，pageFirst和pageMaxResult。
 */
-//TODO 添加一个新HTTTP请求参数，启用该参数时会使Filter禁用分页。这个项目可以为回调列表请求服务。
 class Filter(private val searchMap: Array<String> = arrayOf(),
              private val orderMap: Array<OrderField> = arrayOf(),
              private val filterMap: Array<FilterField<*>> = arrayOf(),
