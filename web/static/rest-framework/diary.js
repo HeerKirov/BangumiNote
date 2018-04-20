@@ -6,7 +6,7 @@ var diary = {
      * 包含的功能点：
      * 1. list显示。包含若干ROW。能分别进行详细处理。
      * 2. 搜索。按照关键字进行搜索。这个操作在本地进行。
-     * 3. 排序。按照既定方案进行复杂排序。这个操作在本地进行。方案包括[名称排序|更新时间排序|更新周数排序*|待观看][name/update_time/weekday/has_next]
+     * 3. 排序。按照既定方案进行复杂排序。这个操作在本地进行。方案包括[名称排序|更新时间排序|更新周数排序*|待观看|建序][name/update_time/weekday/has_next/create]
      * 4. 按照条件筛选。这个操作在本地进行。条件包括[全部|进行中*|更新中|有存货|已归档][all/going/updating/watchable/complete]
      * 5. 刷新。这会重新获取list数据源。
      */
@@ -30,8 +30,8 @@ var diary = {
                     //当data.is_completed === false时，判定为进行中。
                     if(!data.is_completed) filterTrue = true;
                 }else if(filterValue === "updating") {
-                    //当publish < total时，判定为还在更新。
-                    if(data.publish_episode < data.total_episode) filterTrue = true;
+                    //当publish < total 且至少存在1个plan时，判定为还在更新。
+                    if((data.publish_episode < data.total_episode) && (data.publish_plan.length > 0)) filterTrue = true;
                 }else if(filterValue === "watchable") {
                     //当finished < publish时，判定为有存货。
                     if(data.finished_episode < data.publish_episode) filterTrue = true;
@@ -54,12 +54,83 @@ var diary = {
                 3. 更新周数排序：计算下次更新时间的weekday值，并按周一~周日排序，同值的按照当日更新时间排序。
                                     没有下次更新时间的，有Next的排在前面。
                                         最次按照createTime排序。
+                4. 待观看排序：按照publish-finished降序排序。
+                                    该数值相同时，按照createTime排序。
+                5. 建序排序：完全按照createTime排序。
              */
-            var sortFunction = (sortValue === "update_time")? function () {
-
-            }: (sortValue === "weekday")? function () {
-
-            }: ()
+            var xor = function (a, b) {
+                return (a && (!b)) || ((!a) && b);
+            };
+            var getWeekdayValue = function (date) {
+                var day = date.getDay();
+                if (day === 0) day = 7;
+                return date.getMinutes() + date.getHours() * 60 + day * 60 * 24;
+            };
+            var sortFunction = (sortValue === "update_time") ? function (a, b) {
+                var tA = a.sort.time;
+                var tB = b.sort.time;
+                var cA = a.sort.create_time;
+                var cB = b.sort.create_time;
+                var nA = a.sort.next;
+                var nB = b.sort.next;
+                return (xor(tA !== null, tB !== null)) ? ((tA !== null) ? -1 : 1) :
+                    (tA !== null && tB !== null) ? ((tA < tB) ? -1 : 1) :
+                        (xor(nA, nB)) ? (nA ? -1 : 1) :
+                            (cA === cB) ? 0 :
+                                (cA < cB) ? -1 : 1;
+            } : (sortValue === "weekday") ? function (a, b) {
+                var tA = a.sort.time;
+                var tB = b.sort.time;
+                var cA = a.sort.create_time;
+                var cB = b.sort.create_time;
+                var nA = a.sort.next;
+                var nB = b.sort.next;
+                return (xor(tA !== null, tB !== null)) ? ((tA !== null) ? -1 : 1) : //desc, not null在前
+                    (tA !== null && tB !== null) ? ((tA < tB) ? -1 : 1) ://asc
+                        (xor(nA, nB)) ? (nA ? -1 : 1) ://有next在前
+                            (cA === cB) ? 0 :
+                                (cA < cB) ? -1 : 1;//asc
+            } : (sortValue === "has_next") ? function (a, b) {
+                var nA = a.sort.next;
+                var nB = b.sort.next;
+                var cA = a.sort.create_time;
+                var cB = b.sort.create_time;
+                return (nA !== nB) ? ((nA > nB) ? -1 : 1) : //desc
+                    (cA === cB) ? 0 :
+                        (cA < cB) ? -1 : 1; //asc
+            } : (sortValue === "create") ? function (a, b) {
+                var cA = a.sort.create_time;
+                var cB = b.sort.create_time;
+                return (cA === cB) ? 0 : (cA < cB) ? -1 : 1; //asc
+            } : function (a, b) {//name
+                return (a.sort.name === b.sort.name) ? 0 : (a.sort.name < b.sort.name) ? -1 : 1;
+            };
+            //根据排序类型，为排序单元添加所需要的数据。
+            for (var i in list) {
+                var item = list[i];
+                var sortSet = {};
+                item["sort"] = sortSet;
+                var data = item.getProperty();
+                if (sortValue === "update_time") {
+                    sortSet["time"] = (data.publish_plan.length > 0) ? new Date(data.publish_plan[0]).getTime() : null;
+                    sortSet["next"] = (data.publish_episode - data.finished_episode) > 0;
+                    sortSet["create_time"] = new Date(data.create_time).getTime();
+                } else if (sortValue === "weekday") {
+                    sortSet["time"] = (data.publish_plan.length > 0) ? getWeekdayValue(new Date(data.publish_plan[0])) : null;
+                    sortSet["next"] = (data.publish_episode - data.finished_episode) > 0;
+                    sortSet["create_time"] = new Date(data.create_time).getTime();
+                } else if (sortValue === "has_next") {
+                    sortSet["next"] = data.publish_episode - data.finished_episode;
+                    sortSet["create_time"] = new Date(data.create_time).getTime();
+                } else if (sortValue === "create") {
+                    sortSet["create_time"] = new Date(data.create_time).getTime();
+                } else {
+                    sortSet["name"] = data.name;
+                }
+            }
+            list.sort(sortFunction);
+            //清除排序数据。
+            for (i in list) list[i].sort = undefined;
         };
 
         var buildHtml = function () {
@@ -77,12 +148,19 @@ var diary = {
                         .append(sortButton.obj)
                         .append($('<button id="refresh_button" class="btn btn-secondary"><i class="fa fa-refresh"></i></button>'))))
                 .append($('<div id="div_panel" class="row"></div>')
-                    .append($('<div id="row_list" class="col"></div>')))
+                    .append($('<div id="row_list" class="col pt-4"></div>')))
                 .append($('<div id="div_loading" class="row" style="display: none"></div>')
                     .append($('<div class="col"></div>'))
                     .append($('<div class="col-auto"></div>')
                         .append($('<i class="fa fa-spin fa-circle-o-notch fa-3x m-5"></i>')))
-                    .append($('<div class="col"></div>')));
+                    .append($('<div class="col"></div>')))
+                .append($('<div></div>')
+                    .append(modal.obj));
+            ret.find("#search_box").keydown(function (event) { if(event.keyCode === 13){
+                var value = this.value.trim();
+                if(value === "")value = null;
+                setSearch(value);
+            } });
             ret.find("#search_button").click(function () {
                 var value = ret.find("#search_box").val().trim();
                 if(value === "")value = null;
@@ -120,7 +198,11 @@ var diary = {
                         rowList = [];
                         if(success){
                             for(var i in data.content) {
-                                rowList.push(diary.row(detail_rest(data.content[i]), data.content[i]))
+                                rowList.push(diary.row({
+                                    rest: detail_rest(data.content[i]),
+                                    data: data.content[i],
+                                    modal: modal
+                                }))
                             }
                             draw();
                         }else{
@@ -167,7 +249,8 @@ var diary = {
                 {name: "名称排序", title: "名称", value: "name"},
                 {name: "更新时间排序", title: "更新时间", value: "update_time"},
                 {name: "周历排序", title: "周历", value: "weekday"},
-                {name: "待看排序", title: "待看", value: "has_next"}
+                {name: "待看排序", title: "待看", value: "has_next"},
+                {name: "建序排序", title: "建序", value: "create"}
             ],
             defaultValue: "weekday",
             icon: "sort",
@@ -185,6 +268,7 @@ var diary = {
             icon: "filter",
             change: setFilter
         });
+        var modal = diary.modalDialog();
         var obj = buildHtml();
         var refreshButton = obj.find("#refresh_button");
 
@@ -205,9 +289,11 @@ var diary = {
         }
     },
     /**构造一个新的行组件。
-     * initData: 符合要求的diary api item。
+     * data: 符合要求的diary api item。
+     * rest: 符合要求的rest组件.
+     * modal: 可以随时调用的modal组件，存在时会用于二重确认。
      * */
-    row: function (restComponent, initData) {
+    row: function (info) {
         var buildHtml = function () {
             dateList = diary.dateList();
             var ret = $('<div class="card mt-2 mb-2 mb-sm-1 mb-lg-0"></div>')
@@ -266,7 +352,20 @@ var diary = {
             ret.find("#edit_button").click(function () {
                 setEditState(!editState);
             });
-            ret.find("#delete_button").click(doDelete);
+            ret.find("#delete_button").click(function () {
+                if(modal) {
+                    modal.openDialog({
+                        title: "删除",
+                        content: "确认要删除吗？<p><small>删除行为不可撤销。</small>",
+                        button_content: "确定 <i class='fa fa-trash'></i>",
+                        button_class: "btn-danger",
+                        delegate: doDelete
+                    })
+                }else {
+                    doDelete();
+                }
+            });
+            ret.find("#hand_button").click(doIncrease);
             return ret;
         };
         var addWarning = function (msg) {
@@ -336,6 +435,8 @@ var diary = {
                 table_update_read.append($('<tr></tr>').append($('<td></td>').text(value)));
             }
             dateList.setProperty({maxCount: data.total_episode - data.publish_episode, values: data.publish_plan});
+            //hand按钮可用性。
+            obj.find("#hand_button").attr('disabled', data.finished_episode >= data.publish_episode);
             //更新标志文本。
             //Next content会在finished_episode < publish_episode时，展示下一话序列号。
             //在finished == total时，显示已完成。
@@ -406,17 +507,34 @@ var diary = {
                 obj.attr('disabled', false);
             });
         };
+        var doIncrease = function () {
+            //提交需要封锁整个card，并等待返回。
+            obj.attr('disabled', true);
+            rest.update({increase_finished: true}, false, function (success, status, data) {
+                if(success) {
+                    setProperty(data);
+                }else{
+                    if("message" in data) {
+                        addWarning(status + ": " + data.message);
+                    }else{
+                        addWarning("发生错误 " + status);
+                    }
+                }
+                obj.attr('disabled', false);
+            })
+        };
         //数据区
-        var data = initData; //当前呈现的数据
-        var rest = restComponent; //用于REST交互的组件
+        var data = info["data"]; //当前呈现的数据
+        var rest = info["rest"]; //用于REST交互的组件
 
         var editState = false; //当前是否处于编辑状态。
 
         //Object区
+        var modal = info["modal"];
         var dateList = null; //写元素。必须放在root之前。
         var obj = buildHtml(); //root
 
-        setProperty(initData);
+        setProperty(data);
         return {
             obj: obj,
             setProperty: setProperty,
@@ -645,7 +763,7 @@ var diary = {
 
         var currentIndex = 0;
         if("defaultValue" in info && "select" in info) {
-            for(var i in info.select) if(info.select[i] === info.defaultValue) {
+            for(var i in info.select) if(info.select[i].value === info.defaultValue) {
                 currentIndex = i;
                 break;
             }
@@ -655,6 +773,60 @@ var diary = {
 
         return {
             obj: obj
+        }
+    },
+    /**构造一个模态框。
+     * info: {
+     *      title: string
+     *      content: html-string,
+     *      button_content: html-string,
+     *      button_class: string,
+     *      delegate: function()
+     * }
+     * @returns {{obj: *}}
+     */
+    modalDialog: function(){
+        var buildHtml = function () {
+            return $('<div class="modal fade"></div>')
+                .append($('<div class="modal-dialog"></div>')
+                    .append($('<div class="modal-content"></div>')
+                        .append($('<div class="modal-header"></div>')
+                            .append($('<h4 class="modal-title">Header</h4>'))
+                            .append($('<button type="button" class="close" data-dismiss="modal">&times;</button>')))
+                        .append($('<div class="modal-body"></div>'))
+                        .append($('<div class="modal-footer"></div>')
+                            .append($('<button id="check_button" type="button" class="btn" data-dismiss="modal">确认</button>')))));
+
+        };
+        var openDialog = function (info) {
+            var title = ("title" in info)?info.title:"";
+            var content = ("content" in info)?info.content:"";
+            var buttonContent = ("button_content" in info)?info.button_content:"";
+            var buttonClass = ("button_class" in info)?info.button_class:"";
+            delegate = ("delegate" in info)?info.delegate:null;
+            header.text(title);
+            body.html("");
+            body.append(content);
+            checkButton.attr("class", "btn " + buttonClass);
+            checkButton.html("");
+            checkButton.append(buttonContent);
+            obj.modal('show');
+        };
+
+        var obj = buildHtml();
+        var checkButton = obj.find("#check_button");
+        var header = obj.find(".modal-title");
+        var body = obj.find(".modal-body");
+        
+        checkButton.click(function () {
+            if($.isFunction(delegate))delegate();
+        });
+
+        var delegate = null;
+
+        return {
+            obj: obj,
+            openDialog: openDialog
         }
     }
 };

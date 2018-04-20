@@ -20,7 +20,7 @@ class StdBasic : HtmlView(Meta::class, {
                         a_(clazz = "nav-link", href = proxyURL("web_home")) {"主页"}
                     }
                     li(clazz = "nav-item") {
-                        a_(clazz = "nav-link", href = proxyURL("web_diary")) {"追番ing"}
+                        a_(clazz = "nav-link", href = proxyURL("web_diary")) {"日记"}
                     }
                     li(clazz = "nav-item") {
                         a_(clazz = "nav-link", href = proxyURL("web_data")) {"数据库"}

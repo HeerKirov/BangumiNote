@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class DiaryView(@Autowired p: ConstProxy): HtmlView(StdBasic::class, p, {
-    impl("TITLE", text("追番 - ${proxyStr("val_logo")}"))
+    impl("TITLE", text("日记 - ${proxyStr("val_logo")}"))
     impl("BODY", div(clazz = "container") {
         div(clazz = "row m-2")
         div(clazz = "row") {
