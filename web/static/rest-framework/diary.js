@@ -828,5 +828,93 @@ var diary = {
             obj: obj,
             openDialog: openDialog
         }
+    },
+    weekdayTable: function (rest) {
+        var buildHtml = function () {
+            return $('<div class="row">')
+                .append($('<div class="col" id="weekday_content">'))
+        };
+        var addAlert = function (content) {
+          obj.find("#weekday_content")
+              .append($('<div class="alert alert-danger alert-dismissable">')
+              .append($('<button type="button" class="close" data-dismiss="alert">&times;</button>'))
+              .append(content));
+        };
+        var buildTable = function(data) {
+            var tb = obj.find("#weekday_content");
+            var tbTitle = [undefined, 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            var tbColor = [undefined, 'primary', 'success', 'info', 'warning', 'danger', 'secondary', 'dark'];
+            for(var i = 1; i <= 7; ++i) {
+                tb.append('<hr>')
+                    .append($('<div class="row">')
+                        .append($('<div class="col-2 col-lg-1">')
+                            .append('<span class="badge badge-' + tbColor[i] + '">' + tbTitle[i] + '</span>'))
+                        .append($('<div class="col">')
+                            .append($('<div class="row" id="weekday_seq_' + i + '">')))
+                    );
+            }
+            var weekFirst = get_weekday_first(new Date());
+            var cardList = [undefined, [], [], [], [], [], [], []];
+            for(i in data) {
+                var item = data[i];
+                //在至少有1个plan，且该plan的时间是本周/下周时，可以加入列表。
+                //根据plan[0]的getDay,划分到不同的行。
+                if(item.publish_plan.length > 0 && item.total_episode > item.publish_episode) {
+                    var itsDate = new Date(item.publish_plan[0]);
+                    var itsWeek = get_weekday_first(itsDate);
+                    var minus = week_minus(itsWeek, weekFirst);
+                    if(minus >= 0 && minus <= 1) {
+                        var weekday = itsDate.getDay();
+                        if(weekday === 0)weekday = 7;
+                        cardList[weekday].push({
+                            name: item.name,
+                            minus: minus,
+                            date: itsDate,
+                            hour: itsDate.getHours(),
+                            minute: itsDate.getMinutes(),
+                            next: item.publish_episode + 1
+                        });
+                    }
+                }
+            }
+            //排序，并添加card
+            for(i = 1; i <= 7; ++i) {
+                var list = cardList[i];
+                var seq = obj.find("#weekday_seq_" + i);
+                list.sort(function (a, b) {
+                    return (a.minus !== b.minus)?((a.minus < b.minus)?-1:1):
+                        (a.hour !== b.hour)?((a.hour < b.hour)?-1:1):
+                            (a.minute !== b.minute)?((a.minute < b.minute)?-1:1):0;
+                });
+                for(var index in list) {
+                    item = list[index];
+                    seq.append($('<div class="card pt-2 pb-2 pl-3 pr-3 mr-2">')
+                        //.append($('<div class="card-body">')
+                            .append('<h5><strong>' + item.name + '</strong></h5>')
+                            .append('<small><span class="badge badge-' + tbColor[i] + '">' + ((item.minus===1)?'下周':'') + fmt_dt_date(item.date, "hh:ii") + ' 第' + item.next + '话</span></small>')
+                        //)
+                    )
+                }
+            }
+
+        };
+        var obj = buildHtml();
+        if(rest) {
+            rest.request(null, function (success, status, data) {
+                if(success) {
+                    buildTable(data.content);
+                }else{
+                    if("message" in data) addAlert(status + ": " + data.message);
+                    else addAlert("错误 " + status);
+                }
+            });
+        }else{
+            buildTable([]);
+        }
+
+
+
+
+        return obj;
     }
 };

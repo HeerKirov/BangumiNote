@@ -207,6 +207,71 @@ var restful = {
         if(!("deleteMethod" in _info))_info["deleteMethod"] = "DELETE";
         if(!("proxy" in _info))_info["proxy"] = false;
         return obj;
+    },
+    /**构造专门用于对接单条API的泛用类。
+     * @param info
+     * {
+     *      content:{
+     *          name: {
+     *              url: string
+     *              method: string = 'GET'
+     *          }
+     *      }
+     * }
+     */
+    newgeneral: function (info) {
+        var geturl = function (url, params) {
+            var ret;
+            if(url.substring(url.length-5)===".json")ret = url;
+            else ret = url + ".json";
+
+            var p_std = param_to_str(params);
+            if(p_std!==null){
+                ret += "?" + p_std;
+            }
+            return ret;
+        };
+        var param_to_str = function (params) {
+
+            if(params!==null){
+                var ret = "";
+                var first = true;
+                for(var i in params) {
+                    if(first)first = false;else ret += "&";
+                    if($.isArray(params[i])) {
+                        var second = true;
+                        for(var j in params[i]) {
+                            if(second)second = false;else ret += "&";
+                            ret += i + "=" + encodeURIComponent(params[i][j]);
+                        }
+                    }else{
+                        ret += i + "=" + encodeURIComponent(params[i]);
+                    }
+                }
+                return ret;
+            }else return null;
+        };
+        return {
+            request: function(name, params, delegate) {
+                var url = geturl(info.content[name].url, params);
+                $.ajax({
+                    type: info.content[name].method?info.content[name].method:"GET",
+                    async: true,
+                    url: url,
+                    dataType: "json",
+                    success: function(data, textStatus, xhr) {
+                        delegate(true, xhr.status, data);
+                    },
+                    error: function (xhr, textStatus, errorThown) {
+                        var json;try{json = JSON.parse(xhr.responseText);}catch(e){json = {};}
+                        if(textStatus === "timeout")delegate(false, 408, json);
+                        else if(textStatus === "abort")delegate(false, 500, json);
+                        else if(textStatus === "parsererror")delegate(false, 400, json);
+                        else delegate(false, xhr.status, json);
+                    }
+                });
+            }
+        }
     }
 };
 
