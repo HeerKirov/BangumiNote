@@ -29,9 +29,31 @@ class StdBasic : HtmlView(Meta::class, {
                         a_(clazz = "nav-link", href = proxyURL("web_statistics")) {"统计"}
                     }
                 }
+                ul(clazz = "nav navbar-nav navbar-right d-sm-none d-block") {
+                    li(clazz = "nav-item") {
+                        button_(clazz = "nav-link btn btn-link", id = "noticeButtonSmall"){"消息"}
+                    }
+                    li(clazz = "dropdown") {
+                        a(href = "#", clazz = "nav-link dropdown-toggle", dataToggle = "dropdown") {
+                            text(attrAs("security_name"))
+                            b(clazz = "caret")
+                        }
+                        ul(clazz = "dropdown-menu") {
+                            li {a_(clazz = "nav-link text-dark", href = proxyURL("web_document")){"资料"}}
+                            li {a_(clazz = "nav-link text-dark", href = "javascript:void(0)", onclick = "logout()"){"登出"}}
+                        }
+                    }
+                }
             }
             //navbar right
-            ul(clazz = "nav navbar-nav navbar-right") {
+            ul(clazz = "nav navbar-nav navbar-right d-none d-sm-block mr-4") {
+                li(clazz = "nav-item") {
+                    button(clazz = "nav-link btn btn-link", id = "noticeButton"){
+                        i(clazz = "fa fa-comment-o")
+                    }
+                }
+            }
+            ul(clazz = "nav navbar-nav navbar-right d-none d-sm-block") {
                 li(clazz = "dropdown") {
                     a(href = "#", clazz = "nav-link dropdown-toggle", dataToggle = "dropdown") {
                         text(attrAs("security_name"))
@@ -41,6 +63,21 @@ class StdBasic : HtmlView(Meta::class, {
                         li {a_(clazz = "nav-link text-dark", href = proxyURL("web_document")){"资料"}}
                         li {a_(clazz = "nav-link text-dark", href = "javascript:void(0)", onclick = "logout()"){"登出"}}
                     }
+                }
+            }
+        }
+    }, div(clazz = "modal fade", id = "noticeModal") {
+        div(clazz = "modal-dialog") {
+            div(clazz = "modal-content") {
+                div(clazz = "modal-header") {
+                    h4(clazz = "modal-title") {text("消息")}
+                    button_(clazz = "close", dataDismiss = "modal", type = "button") { "&times;" }
+                }
+                div(clazz = "modal-body", id = "noticeModalBody") {
+
+                }
+                div(clazz = "modal-footer") {
+
                 }
             }
         }
@@ -67,5 +104,22 @@ class StdBasic : HtmlView(Meta::class, {
             }
         });
     }
-    """.trimIndent() }, Block("SCRIPT", true))
+    """.trimIndent() }, script {
+        text("""${'$'}(function(){""")
+        text("""
+            var messageRequest = restful.newgeneral({content: {
+                exists: {url: "${proxyURL("api_message_exist")}"},
+                unread: {url: "${proxyURL("api_message_unread")}"}
+            }});
+            analysisNotice({
+                noticeButton: ${'$'}("#noticeButton"),
+                noticeButtonSmall: ${'$'}("#noticeButtonSmall"),
+                noticeModal: ${'$'}("#noticeModal"),
+                noticeModalBody: ${'$'}("#noticeModalBody"),
+                messageRequest: messageRequest
+            });
+        """.trimIndent())
+        block("SCRIPT", true)
+        text("""});""")
+    })
 })

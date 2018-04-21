@@ -215,6 +215,7 @@ fun HtmlTopView.doc(lang: String = "zh", init: Html.() -> Unit) = this.tagList!!
 
 //这个函数像其他标签一样在html结构内添加了一个抽象块。
 fun Tag.block(blockName: String, allowBlank: Boolean = false) = doInit(Block(blockName, allowBlank), {})
+fun block(blockName: String, allowBlank: Boolean = false) = Block(blockName, allowBlank)
 //这个函数将搜索Tag内的children，并获得所有树中Block的引用。
 fun Tag.getBlocks(): Set<Block> {
     val ret = HashSet<Block>()

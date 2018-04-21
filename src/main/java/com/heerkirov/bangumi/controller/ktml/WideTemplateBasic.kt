@@ -1,6 +1,7 @@
 package com.heerkirov.bangumi.controller.ktml
 
 import com.heerkirov.bangumi.controller.ktml.StdBasic
+import com.heerkirov.ktml.builder.Block
 import com.heerkirov.ktml.builder.block
 import com.heerkirov.ktml.builder.HtmlView
 import com.heerkirov.ktml.builder.impl
@@ -22,12 +23,11 @@ class WideTemplateBasic : HtmlView(StdBasic::class, {
             div(clazz = "col p-5 bg-light", id = "api-panel")
         }
     })
-    impl("SCRIPT", script {
+    impl("SCRIPT",
         text("""var requestparams = ${attrSafe("request_params")};
-            ${'$'}(function () { build_navbar(${'$'}("#nav-bar"), [""")
-        block("NAV_BAR", true)
-        text("]);")
-        block("SCRIPT", true)
-        text("});")
-    })
+            build_navbar(${'$'}("#nav-bar"), ["""),
+            Block("NAV_BAR", true),
+        text("]);"),
+            Block("SCRIPT", true)
+    )
 })
