@@ -36,5 +36,4 @@ class User(
         uid.put(name, ret + 1) //每次后推1
         return ret
     }
-    private val serialVersion: Long = 20180420
 }
