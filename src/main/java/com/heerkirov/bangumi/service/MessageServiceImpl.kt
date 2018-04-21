@@ -3,6 +3,8 @@ package com.heerkirov.bangumi.service
 import com.heerkirov.bangumi.dao.Dao
 import com.heerkirov.bangumi.model.Message
 import com.heerkirov.bangumi.model.User
+import com.sun.org.apache.xpath.internal.operations.Bool
+import org.hibernate.criterion.Order
 import org.hibernate.criterion.Restrictions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -11,6 +13,23 @@ import kotlin.collections.HashSet
 
 @Component
 class MessageServiceImpl(@Autowired private val dao: Dao): MessageService {
+    override fun existAnyMessage(user: User): Boolean {
+        return dao.dao<Boolean>{
+            this.query(Message::class).where(Restrictions.eq("userId", user.id)).where(Restrictions.eq("haveRead", false)).exists()
+        }
+    }
+
+    override fun unreadAndSetMessages(user: User): List<Message> {
+        return dao.dao<List<Message>> {
+            val messages = this.query(Message::class).where(Restrictions.eq("userId", user.id)).where(Restrictions.eq("haveRead", false)).order(Order.desc("createTime")).all()
+            for(message in messages) {
+                message.haveRead = true
+                this.update(message)
+            }
+            messages
+        }
+    }
+
     override fun publishGeneral(lists: List<MessageService.GeneralInfo>): List<Message> {
         return dao.dao<List<Message>> {
             val ret = ArrayList<Message>()
