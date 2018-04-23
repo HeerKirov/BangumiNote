@@ -71,7 +71,7 @@ class AnimeDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cla
                 {header: "作者", field: "author", type: "foreignChoice", typeInfo: author_type},
                 {header: "原作", field: "type", type: "mapping", typeInfo: {map: typeMapping}},
                 {header: "关键字", field: "keyword", type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
-                {header: "标签", field: "tag", writable: false, type: "tags", typeInfo: tag_type},
+                {header: "标签", field: "tag", writable: false, type: "foreignChoice", typeInfo: tag_type},
                 "collapse:主观评价",
                 {header: "喜爱度", field: "score_like", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 {header: "耐看度", field: "score_patient", type: "text", writable: false, typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},

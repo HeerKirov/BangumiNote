@@ -36,6 +36,7 @@
  *              sortable: bool = false 可以以该列为基准排序。
  *              link: string|function(json) = null 如果该元素的类型可使用超链接，就为其配置一个链接。也可以传入一个函数用作自定义链接处理，传入json的dataitem。
  *
+ *              noWrap: bool = false 不换行
  *              visibleControl: bool = true 该列接受可见性控制，即会被写入完全控制列表。
  *              visible: bool = true 该列默认可见。这个属性只有在有visible控制时才有效。
  *          }
@@ -210,6 +211,8 @@ function build_list(obj) {
         if(_panel_state!=="panel")return;
         var text = _searchbox.val().trim();
         setsearch(text);
+        //清除分页信息。
+        setpage(0);
         build();
     };
 
@@ -324,7 +327,7 @@ function build_list(obj) {
         var table_class = "table";
         if(_info.table.striped) table_class += " table-striped";
         if(_info.table.small) table_class += " table-sm";
-        if(_info.table.responsive) table_class += " table-responsive text-nowrap";
+        if(_info.table.responsive) table_class += " table-responsive-md";
         var table = $('<table></table>').attr("class", table_class);
         return $('<div class="row"></div>').append(table.append(thead).append(tbody));
     };
@@ -376,7 +379,9 @@ function build_list(obj) {
             for(var j in _info.content) {
                 var field = _info.content[j];
                 var fieldvalue = dataitem[field.field];
-                var td = $('<td></td>').attr("class", "rest-td" + j);
+                var clazz = "rest-td" + j;
+                if(field.noWrap) clazz += " text-nowrap";
+                var td = $('<td></td>').attr("class", clazz);
                 //为td填充内容
                 var tdcontent = build_list_field(field, dataitem);
                 tr.append(td.append(tdcontent));
@@ -652,6 +657,7 @@ function build_list(obj) {
                 if(!("source" in field))field["source"] = null;
                 if(!("visibleControl" in field))field["visibleControl"] = true;
                 if(!("visible" in field))field["visible"] = true;
+                if(!("noWrap" in field))field["noWrap"] = false;
                 //如果存在显示被控性，就构造默认值。
                 if(_info.visibleGroup||_info.visibleControl)_visiblestatus[i] = field["visible"];
             }
@@ -731,11 +737,12 @@ function build_list_field(field, dataitem) {
  */
 var list_field_elements = {
     text: function (info, value, link, dataitem) {
-        return (link===null)?$('<label></label>').text(value):$('<a></a>').attr("href", link(dataitem)).text(value);
+        return (link===null)?$('<label></label>').text(value):$('<a class="text-dark"></a>').attr("href", link(dataitem)).text(value);
     },
     source: function (info, value, link, dataitem) {
         var contentArray = [value];
         var parentObject = [dataitem];
+        var badge = false;
         if(info) {
             if("many" in info && info["many"]) {
                 if(value instanceof Array) {
@@ -755,6 +762,7 @@ var list_field_elements = {
                     }
                 }
             }
+            if("badge" in info && info["badge"] === true) badge = true;
         }
         var ret = [];
         for(i in contentArray) {
@@ -762,9 +770,11 @@ var list_field_elements = {
             var linkContent = parentObject[i];
             if(link!==null && linkContent!==null) {
                 var linkResult = link(linkContent);
-                ret.push($('<a></a>').attr("href", linkResult).text(current));
+                if(badge)ret.push($('<span class="badge badge-secondary"></span>').append($('<a class="text-white"></a>').attr("href", linkResult).text(current)));
+                else ret.push($('<a class="text-dark"></a>').attr("href", linkResult).text(current));
             }else{
-                ret.push($('<label></label>').text(current));
+                if(badge)ret.push($('<span class="badge badge-secondary"></span>').text(current));
+                else ret.push($('<label></label>').text(current));
             }
         }
         if(ret.length === 1) return ret[0];
@@ -773,6 +783,7 @@ var list_field_elements = {
             var first = true;
             for(i in ret){
                 if(first)first = false;
+                else if(badge)div.append(" ");
                 else div.append(", ");
                 div.append(ret[i]);
             }
@@ -789,7 +800,7 @@ var list_field_elements = {
         var resultValue;
         if(value in map) resultValue = map[value];
         else resultValue = value;
-        return (link===null)?$('<label></label>').text(resultValue):$('<a></a>').attr("href", link(dataitem)).text(resultValue);
+        return (link===null)?$('<label></label>').text(resultValue):$('<a class="text-dark"></a>').attr("href", link(dataitem)).text(resultValue);
     },
     datetime: function (info, origin_value, link, dataitem) {
         var fmt = "yyyy-mm-dd hh:ii:ss";
@@ -797,14 +808,13 @@ var list_field_elements = {
             if("format" in info) fmt = info["format"];
         }
         var value = fmt_dt_json(origin_value, fmt);
-        return (link===null)?$('<label></label>').text(value):$('<a></a>').attr("href", link(dataitem)).text(value);
+        return (link===null)?$('<label></label>').text(value):$('<a class="text-dark"></a>').attr("href", link(dataitem)).text(value);
     },
     bool: function(info, origin_value, link, dataitem) {
         if(info) {
             if(!("yesIcon" in info))info["yesIcon"] = true;
             if(!("noIcon" in info))info["noIcon"] = false;
         }
-        console.log("value=" + origin_value);
         return $("<i></i>").attr("class", (origin_value===true&&info.yesIcon)?"fa fa-check":(origin_value===false&&info.noIcon)?"fa fa-times":"");
     }
 };
@@ -814,6 +824,7 @@ var default_list_field_elements = "text";
  * source: {
  *      subField: any|[any] = [] 给出该序列时，会从目标field中逐层搜索json值。
  *      many: bool = false 该field将处理一个数组，届时将列出多个值。subField的处理在这之后。
+ *      badge: bool = false 使用徽章展示内容。
  * }
  * mapping: {
  *      map: object = undefined 给出此映射的映射序列。不存在时，不进行映射，行为和text一致。

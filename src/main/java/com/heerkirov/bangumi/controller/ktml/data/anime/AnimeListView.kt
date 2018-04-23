@@ -29,6 +29,7 @@ class AnimeListView(@Autowired p: ConstProxy): HtmlView(WideTemplateBasic::class
         var rest = restful.newlist({url: "${proxyURL("api_content_anime")}"}).appendparams(requestparams);
         build_list(${'$'}("#api-panel")).info({
             title: "番组",
+            table: {responsive: true},
             createUrl: "${proxyURL("web_data_anime_create")}",
             visibleControl: true,
             visibleGroup: [
@@ -50,7 +51,7 @@ class AnimeListView(@Autowired p: ConstProxy): HtmlView(WideTemplateBasic::class
                 {header: "关键字", field: "keyword", sortable: true},
                 {header: "系列", field: "series", type: "source", sortable: true, typeInfo: {subField: ["name"]}, link: function(i) {return "${proxyURL("web_data_series_detail")}" + i.id}},
                 {header: "作者", field: "author", type: "source", sortable: true, typeInfo: {many: true, subField: ["name"]}, link: function(i) {return "${proxyURL("web_data_author_detail")}" + i.id}},
-                {header: "标签", field: "tag", type: "source", sortable: true, typeInfo: {many: true, subField: ["name"]}, link: function(i) {return "${proxyURL("web_data_tag_detail")}" + i.id}},
+                {header: "标签", field: "tag", type: "source", sortable: true, typeInfo: {many: true, badge: true, subField: ["name"]}, link: function(i) {return "${proxyURL("web_data_tag_detail")}" + i.id}},
 
                 {header: "评价:喜爱", field: "score_like", sortable: true},
                 {header: "评价:耐看", field: "score_patient", sortable: true},

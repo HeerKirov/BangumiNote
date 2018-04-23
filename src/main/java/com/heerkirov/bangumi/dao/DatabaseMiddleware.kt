@@ -234,7 +234,7 @@ class DatabaseMiddleware(private val session: Session) {
             val retIndex: Int = pageFirst?:0
             val retCount: Long?
             //首先不添加分页信息，得到总条目数目
-            val cr1 = session.createCriteria(clazz.java).appendWhere().appendFetchModeSelect()
+            val cr1 = session.createCriteria(clazz.java).appendFetchModeSelect().appendWhere()
                     .innerJoin(order = false)
                     .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
             val ret1 = try{ cr1.list() }catch (e: HibernateException) {
@@ -245,7 +245,7 @@ class DatabaseMiddleware(private val session: Session) {
 
             //然后添加分页信息，并得到数据
             val cr2 = session.createCriteria(clazz.java)
-            cr2.appendWhere().appendOrder().appendFetchModeSelect().innerJoin().appendProject().appendPage()
+            cr2.appendFetchModeSelect().appendWhere().appendOrder().innerJoin().appendProject().appendPage()
                     .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
             val ret2 = try{ cr2.list() }catch (e: HibernateException) {
                 if(session.isOpen)session.close()
@@ -258,7 +258,7 @@ class DatabaseMiddleware(private val session: Session) {
         }
         fun all(): List<T> {
             val cr = session.createCriteria(clazz.java)
-            cr.appendWhere().appendOrder().appendFetchModeSelect().innerJoin().appendProject().appendPage()
+            cr.appendFetchModeSelect().appendWhere().appendOrder().innerJoin().appendProject().appendPage()
                     .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
             val ret = try{ cr.list() }catch (e: HibernateException) {
                 if(session.isOpen)session.close()
@@ -269,7 +269,7 @@ class DatabaseMiddleware(private val session: Session) {
         }
         fun first(): T? {
             val cr = session.createCriteria(clazz.java)
-            cr.appendWhere().appendOrder().appendFetchModeSelect().innerJoin().appendProject()
+            cr.appendFetchModeSelect().appendWhere().appendOrder().innerJoin().appendProject()
                     .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
             pageFirst?.let { cr.setFirstResult(it) }
             cr.setMaxResults(1)
@@ -287,7 +287,7 @@ class DatabaseMiddleware(private val session: Session) {
             if(pageCount in 0..index+1) {
                 return null
             }else{
-                cr.appendWhere().appendOrder().appendFetchModeSelect().innerJoin().appendProject()
+                cr.appendFetchModeSelect().appendWhere().appendOrder().innerJoin().appendProject()
                         .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
                 pageFirst?.let { cr.setFirstResult(it+index) }
                 cr.setMaxResults(1)
@@ -301,7 +301,7 @@ class DatabaseMiddleware(private val session: Session) {
         }
         fun count(): Long {
             val cr = session.createCriteria(clazz.java)
-            cr.appendWhere().appendFetchModeSelect().innerJoin(order = false).appendPage()
+            cr.appendFetchModeSelect().appendWhere().innerJoin(order = false).appendPage()
                     .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
             cr.setProjection(Projections.rowCount())
             val ret = try{ cr.list() }catch (e: HibernateException) {

@@ -1,25 +1,22 @@
 import com.heerkirov.bangumi.model.Anime
-import com.heerkirov.bangumi.model.Author
-import com.heerkirov.bangumi.model.Series
+import com.heerkirov.bangumi.model.Bangumi
 import org.hibernate.FetchMode
 import org.hibernate.cfg.Configuration
 import org.hibernate.criterion.CriteriaSpecification
-import org.hibernate.criterion.MatchMode
-import org.hibernate.criterion.Projections
-import org.hibernate.criterion.Restrictions
-import java.util.*
 
 fun main(args: Array<String>){
     val factory = Configuration().configure().buildSessionFactory()!!
     val session = factory.openSession()
     val tx = session.beginTransaction()
 
-    val anime = session.createCriteria(Anime::class.java)
+    val anime = session.createCriteria(Bangumi::class.java)
+            .setFetchMode("anime", FetchMode.SELECT)
             .setFetchMode("authorList", FetchMode.SELECT)
-            .add(Restrictions.ilike("keyword", "1", MatchMode.ANYWHERE))
+            .setFetchMode("tagList", FetchMode.SELECT)
+            .setMaxResults(10)
             .setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY)
             .list()
-    println(anime)
+    println("count: ${anime.size}")
     tx.commit()
     session.close()
 }

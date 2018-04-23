@@ -29,6 +29,7 @@ class BangumiListView(@Autowired p: ConstProxy): HtmlView(WideTemplateBasic::cla
         var rest = restful.newlist({url: "${proxyURL("api_content_bangumi")}"}).appendparams(requestparams);
         build_list(${'$'}("#api-panel")).info({
             title: "番剧",
+            table: {responsive: true},
             createUrl: "${proxyURL("web_data_bangumi_create")}",
             visibleControl: true,
             visibleGroup: [
@@ -69,7 +70,7 @@ class BangumiListView(@Autowired p: ConstProxy): HtmlView(WideTemplateBasic::cla
                 {header: "音乐", field: "make_music", sortable: true},
                 {header: "人物", field: "make_person", sortable: true},
                 {header: "背景", field: "make_background", sortable: true},
-                {header: "标签", field: "tag", type: "source", sortable: true, typeInfo: {many: true, subField: ["name"]}, link: function(i) {return "${proxyURL("web_data_tag_detail")}" + i.id}},
+                {header: "标签", field: "tag", type: "source", sortable: true, typeInfo: {many: true, badge: true, subField: ["name"]}, link: function(i) {return "${proxyURL("web_data_tag_detail")}" + i.id}},
 
                 {header: "条目创建时间", field: "create_time", sortable: true, type: "datetime"},
                 {header: "最后更新时间", field: "update_time", sortable: true, type: "datetime"}

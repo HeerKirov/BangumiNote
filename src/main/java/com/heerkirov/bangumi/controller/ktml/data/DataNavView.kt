@@ -36,11 +36,11 @@ class DataNavView(@Autowired p: ConstProxy): HtmlView(StdBasic::class, p, {
             div(clazz = "col-sm-1")
         }
     })
-    impl("SCRIPT", script_ {"""
+    impl("SCRIPT", text("""
         ${'$'}(document).ready(function () {
         build_navbar(${'$'}("#nav-bar"), [
             {title: "数据库", link: "${proxyURL("web_data")}"},
         ]);
     })
-    """.trimIndent()})
+    """.trimIndent()))
 })

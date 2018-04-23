@@ -1373,7 +1373,7 @@ var detail_fields = {
                     else readEle.append(str);
                 }
             }
-            info.request_write(writeEle, value);
+            if("request_write" in info)info.request_write(writeEle, value);
         },
         refresh: function (info, readEle, writeEle, origin_value) {
             //为了节省资源，只在value中包含新建的资源时刷新。

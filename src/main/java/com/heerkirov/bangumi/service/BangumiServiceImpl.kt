@@ -116,5 +116,5 @@ class BangumiServiceImpl(@Autowired val dao: Dao): BangumiService {
         return dao.dao<Boolean> { this.query(Bangumi::class).feature(feature).joinSelect(fetchSelectList).exists() }
     }
 
-    private val fetchSelectList = listOf("tagList", "companyList")
+    private val fetchSelectList = listOf("tagList", "companyList", "anime")
 }

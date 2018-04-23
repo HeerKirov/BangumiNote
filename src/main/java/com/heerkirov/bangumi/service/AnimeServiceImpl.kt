@@ -97,6 +97,6 @@ class AnimeServiceImpl(@Autowired val dao: Dao): AnimeService {
         return dao.dao<Boolean> { this.query(Anime::class).feature(feature).joinSelect(fetchSelectList).exists() }
     }
 
-    private val fetchSelectList = listOf("authorList")
+    private val fetchSelectList = listOf("authorList", "tagList")
 
 }
