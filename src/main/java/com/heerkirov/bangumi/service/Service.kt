@@ -10,6 +10,10 @@ interface OptionalService {
 
 @Service
 interface MessageService {
+    fun existAnyMessage(user: User): Boolean
+
+    fun unreadAndSetMessages(user: User): List<Message>
+
     fun publishGeneral(lists: List<GeneralInfo>): List<Message>
 
     fun publishDiaryPublish(lists: List<DiaryPublishInfo>): List<Message>
@@ -46,6 +50,7 @@ interface TagService: RestfulService<Tag>
 interface DiaryService: RestfulService<Diary> {
     fun analysisPlan(): List<MessageService.DiaryPublishInfo>
 
+    fun handleFinished(obj: Diary): Diary
 
 }
 

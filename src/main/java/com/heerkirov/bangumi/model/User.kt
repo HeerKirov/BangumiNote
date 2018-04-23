@@ -6,6 +6,7 @@ import com.heerkirov.bangumi.model.base.Model
 import com.heerkirov.bangumi.model.base.UBModel
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
+import java.io.Serializable
 import java.util.*
 import javax.persistence.*
 import kotlin.collections.HashMap
@@ -18,6 +19,7 @@ class User(
         @Id @Column(name = "id", length = 16, nullable = false) var id: String = "",
         @Column(name = "name", length = 16, nullable = false) var name: String = "",
         @Column(name = "password", length = 128, nullable = false) var password: String = "",
+        @Column(name = "salt", length = 64, nullable = false) var salt: String = "",
         @Column(name = "is_admin", nullable = false) var admin: Boolean = false,
 
         @Column(name = "create_time", nullable = false)var createTime: Calendar? = null,
@@ -25,7 +27,7 @@ class User(
         @Column(name = "last_login", nullable = false)var lastLogin: Calendar? = null,
 
         @Column(name = "uid", nullable = false)@Type(type = "json")var uid: HashMap<String, Any?> = hashMapOf()
-): DTModel() {
+): DTModel(), Serializable {
     fun<T> incUid(model: KClass<T>): Int where T: UBModel {
         //该函数将提取目标uid，并自动在模型内将uid后推一位。
         val name = model.simpleName!!

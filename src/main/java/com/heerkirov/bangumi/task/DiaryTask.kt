@@ -17,7 +17,6 @@ class DiaryTask(@Autowired private val diaryService: DiaryService,
             //执行任务计划
             val results = diaryService.analysisPlan()
             //发布消息
-            //TODO 添加通知选项。
             messageService.publishDiaryPublish(results)
         }catch(e: HibernateException) {
             e.printStackTrace()

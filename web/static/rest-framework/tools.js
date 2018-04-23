@@ -20,15 +20,13 @@ function build_navbar(obj, arr) {
  * obj 传入jquery对象
  * arr 传入{title: String, link: String}的数组，表示要构造的内容。
  */
+//TODO 替换侧边导航栏的样式，替换成主页的新样式。
 function build_navlist(obj, arr) {
-    var ul = $('<ul class="nav flex-column pt-2 pb-2">');
+    var ul = $('<tbody>');
     for(var i in arr){
-        var li = $('<li class="nav-item border border-left-0 border-right-0 m-1"></li>');
-        var a = $('<a class="nav-link text-dark" href="#"></a>').attr('href', arr[i].link).text(arr[i].title);
-        li.append(a);
-        ul.append(li);
+        ul.append($('<tr>').append($('<td>').append($('<a class="text-dark"></a>').attr('href', arr[i].link).html("|&nbsp;" + arr[i].title))))
     }
-    obj.append(ul);
+    obj.append($('<table class="table">').append(ul));
 }
 
 //其他的小工具函数

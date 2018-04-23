@@ -124,6 +124,43 @@ class DiaryServiceImpl(@Autowired private val dao: Dao): DiaryService {
         }
     }
 
+    override fun handleFinished(obj: Diary): Diary {
+        //额外的函数。只用来为目标diary推进1位finished。
+        return dao.dao<Diary> {
+            val bangumi = obj.bangumi!!
+
+            //3 & do it
+            if(obj.publishEpisode == null)obj.publishEpisode = 0
+            if(obj.finishedEpisode == null)obj.finishedEpisode = 0
+            obj.finishedEpisode = obj.finishedEpisode!! + 1
+            if(obj.publishEpisode!! > obj.totalEpisode!!) obj.publishEpisode = obj.totalEpisode
+            if(obj.finishedEpisode!! > obj.publishEpisode!!) obj.finishedEpisode = obj.publishEpisode
+            //4
+            obj.completed = (obj.finishedEpisode == obj.totalEpisode)
+            //5
+            if(obj.completed && bangumi.finishedTime == null) {
+                bangumi.finishedTime = Calendar.getInstance()
+                this.update(bangumi)
+            }
+            else if(!obj.completed && bangumi.finishedTime != null) {
+                bangumi.finishedTime = null
+                this.update(bangumi)
+            }
+            //7
+            val episodes = this.query(Episode::class).where(Restrictions.eq("bangumi_id", bangumi.id)).all()
+            if(episodes.isNotEmpty()) {
+                for(episode in episodes) {
+                    if(episode.finishedTime == null && episode.serial!! <= obj.finishedEpisode!!) {
+                        episode.finishedTime = Calendar.getInstance()
+                        this.update(episode)
+                    }
+                }
+            }
+            this.update(obj)
+            obj
+        }
+    }
+
     override fun delete(obj: ServiceSet<Diary>, appendItem: Set<String>?) {
         dao.dao { this.delete(obj.obj) }
     }

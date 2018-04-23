@@ -11,8 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class BangumiServiceImpl(@Autowired val dao: Dao): BangumiService {
-    /*TODO 接下来要做的
-        6. 想一个方案，使bangumi在update时，能够有选择地更新anime的commit，而不是一股脑全更新了。
+    /*TODO 想一个方案，使bangumi在update时，能够有选择地更新anime的commit，而不是一股脑全更新了。
     */
     override fun create(obj: ServiceSet<Bangumi>, appendItem: Set<String>?): ServiceSet<Bangumi> {
         return dao.dao<ServiceSet<Bangumi>> {

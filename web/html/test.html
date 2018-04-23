@@ -35,17 +35,36 @@
                 <a class="nav-link" href="/web/home/home">主页</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">追番ing</a> <!-- TODO -->
+                <a class="nav-link" href="#">追番ing</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">数据库</a> <!-- TODO -->
+                <a class="nav-link" href="#">数据库</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">统计</a> <!-- TODO -->
+                <a class="nav-link" href="#">统计</a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right d-sm-none d-block">
+            <li class="nav-item">
+                <button class="btn btn-link nav-link notice-button">消息</button>
+            </li>
+            <li class="dropdown">
+                <a href="#" class=" nav-link dropdown-toggle" data-toggle="dropdown">
+                    USER <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link text-dark" href="#">资料</a></li>
+                    <li><a class="nav-link text-dark" href="#">登出</a></li>
+                </ul>
             </li>
         </ul>
     </div>
-    <ul class="nav navbar-nav navbar-right">
+    <ul class="nav navbar-nav navbar-right d-none d-sm-block mr-4">
+        <li class="nav-item">
+            <button class="btn btn-link nav-link notice-button"><i class="fa fa-comment-o"></i></button>
+        </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right d-none d-sm-block">
         <li class="dropdown">
             <a href="#" class=" nav-link dropdown-toggle" data-toggle="dropdown">
                 USER <b class="caret"></b>
@@ -56,15 +75,38 @@
             </ul>
         </li>
     </ul>
+
 </nav>
-<div class="container">
-    <div class="row m-2">
-        <div class="col-md-2"></div>
-        <div class="col" id="nav-bar">
-            <i class="fa fa-spin fa-circle-o-notch text-center"></i>
+<div class="modal fade" id="noticeModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">消息</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                Update!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+            </div>
+
         </div>
     </div>
-    <div class="row p-5 bg-light p-5" id="api-panel">
+</div>
+<div class="container">
+    <div class="row m-4">
+        <div class="col-md-2"></div>
+
+    </div>
+    <div class="row">
+        <!-- TODO 添加一个概念型的数值展示器，宽松地展示一些基础统计数据。为此需要添加一个专用的统计API。 -->
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-2 p-4 m-sm-2 mt-2 mt-sm-0 bg-light order-1 order-sm-0" id="nav_list">
+        </div>
+        <div class="col-12 col-md p-4 m-sm-2 bg-light order-0 order-sm-1" id="api_panel">
+        </div>
     </div>
 
 </div>
@@ -78,37 +120,16 @@
 </body>
 <script>
     $(function () {
-        var data = {
-            id: 1,
-            uid: 1,
-            name: "魔法禁书目录",
-            bangumi: {
-                id: 1,
-                uid: 1,
-                serial: 1,
-                name: "魔法禁书目录"
-            },
-            total_episode: 24,
-            publish_episode: 24,
-            finished_episode: 24,
-            is_completed: false,
-            publish_plan: [
-                //"2018-4-10 12:00:00",
-                //"2018-4-18 00:00:00",
-                "2018-4-18 23:00:00",
-                "2018-4-19 23:00:00",
-                "2018-4-22 23:59:59",
-                "2018-4-23 00:00:00",
-                "2018-4-29 23:59:59",
-                "2018-4-30 00:00:00",
-                "2019-1-1 00:00:00"
-            ],
-            create_time: "2018-1-14 12:05:02",
-            update_time: "2018-1-14 12:05:02"
-        };
-        var restDetail = restful.newdetail({url: "/"});
-        //$("#api-panel").append(diary.row(restDetail, data).obj);
-        $("#api-panel").append(diary.root().obj);
+        build_navlist($("#nav_list"), [
+            {title: "日记", link: "/web/diaries"},
+            {title: "数据库", link: "/web/data"},
+            {title: "&nbsp;&nbsp;&nbsp;&nbsp;系列", link: "/web/data/series"},
+            {title: "&nbsp;&nbsp;&nbsp;&nbsp;番组", link: "/web/data/animes"},
+            {title: "&nbsp;&nbsp;&nbsp;&nbsp;番剧", link: "/web/data/bangumis"},
+            {title: "统计", link: "/web/statistics"}
+        ]);
+        var table = diary.weekdayTable();
+        $("#api_panel").append(table);
     })
 </script>
 </html>

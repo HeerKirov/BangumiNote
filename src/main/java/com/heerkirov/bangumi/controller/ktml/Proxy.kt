@@ -49,6 +49,9 @@ class Proxy : ConstProxy({
     url("api_user_register", {"/api/user/register.json"})
     url("api_user_current", {"/api/user/current.json"})
     url("api_user_password", {"/api/user/password.json"})
+    //message系列api
+    url("api_message_exist", {"/api/message/exist.json"})
+    url("api_message_unread", {"/api/message/unread_messages.json"})
     //diary系列api
     url("api_diary", {"/api/diaries.json"})
     url("api_diary_detail", {"/api/diaries/${it["id"]?:""}.json"})

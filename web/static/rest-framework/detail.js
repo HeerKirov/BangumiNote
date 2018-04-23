@@ -1533,9 +1533,3 @@ var default_detail_field_elements = "text";
  *      noIcon: bool = true
  *  }
  */
-
-/**TODO detail页
- 需要做一个匹配List<*>的东西。与create细节近似。
- 需要做一个匹配模型引用的东西，结合list&create对应功能的特点。展示时直接展示json名称，修改时与create操作相仿。
- 为了扩充功能，需要加入一个组件对应多个json field的功能。使field能传入数组就可以。
- */
