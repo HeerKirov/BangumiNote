@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task.xsd">
+    <context:property-placeholder location="classpath:*.properties" system-properties-mode="FALLBACK"/>
+    <task:annotation-driven />
+    <mvc:annotation-driven/>
+    <mvc:resources mapping="/static/**" location="/static/"/>
+    <context:annotation-config/>
+    <context:component-scan base-package="com.heerkirov.bangumi.controller"/>
+    <context:component-scan base-package="com.heerkirov.bangumi.model"/>
+    <context:component-scan base-package="com.heerkirov.bangumi.dao"/>
+    <context:component-scan base-package="com.heerkirov.bangumi.service"/>
+    <context:component-scan base-package="com.heerkirov.bangumi.task"/>
+    <!--<bean class="com.heerkirov.bangumi.config.DispatcherConfig"/>-->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL95Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <!--<prop key="hibernate.hbm2ddl">update</prop>-->
+            </props>
+        </property>
+        <property name="annotatedClasses">
+            <list>
+                <value>com.heerkirov.bangumi.model.User</value>
+                <value>com.heerkirov.bangumi.model.Optional</value>
+                <value>com.heerkirov.bangumi.model.Series</value>
+                <value>com.heerkirov.bangumi.model.Author</value>
+                <value>com.heerkirov.bangumi.model.Company</value>
+                <value>com.heerkirov.bangumi.model.Anime</value>
+                <value>com.heerkirov.bangumi.model.Bangumi</value>
+                <value>com.heerkirov.bangumi.model.Episode</value>
+                <value>com.heerkirov.bangumi.model.Tag</value>
+                <value>com.heerkirov.bangumi.model.Diary</value>
+                <value>com.heerkirov.bangumi.model.Message</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close" init-method="init">
+        <property name="url" value="jdbc:postgresql://${host}:${port}/${database}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+
+        <property name="filters" value="stat"/>
+
+        <property name="maxActive" value="20" />
+        <property name="initialSize" value="1" />
+        <property name="maxWait" value="30000" />
+        <property name="minIdle" value="1" />
+
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+
+        <property name="poolPreparedStatements" value="false" />
+        <property name="maxOpenPreparedStatements" value="50" />
+    </bean>
+    <bean id="securitySalt" class="com.heerkirov.bangumi.service.SecuritySalt">
+        <constructor-arg>
+            <value>${salt}</value>
+        </constructor-arg>
+    </bean>
+</beans>

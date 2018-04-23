@@ -37,14 +37,13 @@ class BangumiCreateView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::c
             ]
         };
         var tag_type_info = {
-            many: true,
             foreignRequest: function(delegate) { tag_rest.request(null, function(success, status, data) { if(success)delegate(data.content) }) },
             foreignHeader: function(json) { return json.name },
             foreignValue: function(json) { return json.id },
-            customContent: [
-                {header: "标签", field: "name", type: "text", typeInfo: {length: 8, allowBlank: false}},
-                {header: "描述", field: "description", type: "text", typeInfo: {length: 128, allowBlank: true}}
-            ]
+            customHeader: function(value) { return value },
+            customValue: function(value) { return {name: value} },
+
+            customRepeatCheck: function(value, json) {return json.name === value},
         };
         var typeMapping = [
             {header: "TV", value: "tv"},
@@ -62,7 +61,7 @@ class BangumiCreateView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::c
                 {header: "名称", field: "name", type: "text", typeInfo: {length: 128, allowBlank: false}},
                 {header: "番组", field: "anime", type: "foreignChoice", typeInfo: anime_type_info},
                 "hr",
-                {header: "标签", field: "tag", optionFlag: true, type: "foreignChoice", typeInfo: tag_type_info},
+                {header: "标签", field: "tag", optionFlag: true, type: "tag", typeInfo: tag_type_info},
                 "hr",
                 {header: "制作公司", field: "company", optionFlag: true, type: "foreignChoice", typeInfo: company_type_info},
                 {header: "放送类型", field: "play_type", type: "mapping", defaultValue: "tv", typeInfo: {map: typeMapping}},

@@ -42,15 +42,14 @@ class BangumiDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::c
             link: function(json) { return "${proxyURL("web_data_company_detail")}" + json.id }
         };
         var tag_type = {
-            many: true,
             foreignRequest: function(delegate) { tag_rest.request(null, function(success, status, data) { if(success)delegate(data.content) }) },
             foreignHeader: function(json) { return json.name },
             foreignValue: function(json) { return json.id },
-            customContent: [
-                {header: "标签", field: "name", type: "text", typeInfo: {length: 8, allowBlank: false}},
-                {header: "描述", field: "description", type: "text", typeInfo: {length: 128, allowBlank: true}}
-            ],
-            showContent: function (json) { return json.name },
+            customHeader: function(value) { return value },
+            customValue: function(value) { return {name: value} },
+
+            customRepeatCheck: function(value, json) {return json.name === value},
+            readHeader: function(json) {return json.name},
             link: function(json) { return "${proxyURL("web_data_tag_detail")}" + json.id }
         };
         var typeMapping = [
@@ -70,7 +69,7 @@ class BangumiDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::c
                 {header: "名称", field: "name", type: "text", typeInfo: {length: 128, allowBlank: false}},
                 {header: "番组", field: "anime", type: "foreignChoice", typeInfo: anime_type},
                 "hr",
-                {header: "标签", field: "tag", type: "foreignChoice", typeInfo: tag_type},
+                {header: "标签", field: "tag", type: "tag", typeInfo: tag_type},
                 "hr",
                 {header: "制作公司", field: "company", type: "foreignChoice", typeInfo: company_type},
                 {header: "放送类型", field: "play_type", type: "mapping", typeInfo: {map: typeMapping}},
@@ -85,17 +84,17 @@ class BangumiDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::c
                 {header: "二刷", field: "multiple_time", type: "bool", typeInfo: {allowNull: false}},
                 {header: "看过原作", field: "seen_the_original", type: "bool", typeInfo: {allowNull: false}},
                 "collapse:主观评价",
-                {header: "喜爱度", field: "score_like", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "耐看度", field: "score_patient", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "喜爱度", field: "score_like", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "耐看度", field: "score_patient", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 "collapse:制作评价",
-                {header: "制作", field: "make_make", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "剧本", field: "make_drama", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "音乐", field: "make_music", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "人物", field: "make_person", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "背景", field: "make_background", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "制作", field: "make_make", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "剧本", field: "make_drama", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "音乐", field: "make_music", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "人物", field: "make_person", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "背景", field: "make_background", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 "collapse:限制级评级",
-                {header: "R18 评级", field: "level_r18", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
-                {header: "R18G评级", field: "level_r18g", type: "text", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "R18 评级", field: "level_r18", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
+                {header: "R18G评级", field: "level_r18g", type: "number", typeInfo: {min: 0, max: 10, allowBlank: true, allowNull: true}},
                 "end",
                 "hr",
                 {header: "条目创建时间", field: "create_time", type: "datetime", writable: false},

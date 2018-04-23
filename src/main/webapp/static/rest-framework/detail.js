@@ -1200,7 +1200,7 @@ var detail_fields = {
                 if(info.many) {
                     info.select_box[0].selectedIndex = -1;
                     for(var k in value) {
-                        for(i in info.select_data) {
+                        for(var i in info.select_data) {
                             if(info.isValueContent(value[k], info.select_data[i])) {
                                 info.select_box.find("#" + i).attr("selected", true);
                                 break;
@@ -1350,7 +1350,7 @@ var detail_fields = {
                 readEle.html("");
                 var first = true;
                 for(var i in value) {
-                    if(value !== null) {
+                    if(value[i] !== null) {
                         if(first)first = false;else readEle.append(", ");
                         var str = (value[i] !== null) ? info.showContent(value[i]) : "";
                         var link = null;
@@ -1388,6 +1388,294 @@ var detail_fields = {
                 }else{
                     if(info.isNewValue(origin_value)){
                         info.request_refresh();
+                    }
+                }
+            }
+        }
+    },
+    tag: {
+        _index: 0,
+        init: function (info) {
+            if(!("allowForeign" in info))info["allowForeign"] = true;
+            if(!("allowCustom" in info))info["allowCustom"] = true;
+            if(!("readHeader" in info))info["readHeader"] = null;
+            if(!("customRepeatCheck" in info))info["customRepeatCheck"] = null;
+            if(info.allowForeign) {
+                if(!("collapseTitle" in info))info["collapseTitle"] = "更多";
+                if(!("foreignRequest" in info))throw "foreignRequest is necessary.";
+                if(!("foreignValue" in info))throw "foreignValue is necessary.";
+                if(!("foreignHeader" in info))throw "foreignHeader is necessary.";
+            }
+            if(info.allowCustom) {
+                if(!("customValue" in info))throw "customValue is necessary.";
+                if(!("customHeader" in info))throw "customHeader is necessary.";
+            }
+            if(!("isValueContent" in info))info["isValueContent"] = function (json, goal) {
+                if(json instanceof Object && goal instanceof Object && ("id" in json) && ("id" in goal))return json.id === goal.id;
+                else return json === goal;
+            };
+            if(!("isNewValue" in info))info["isNewValue"] = function (value) {
+                return (value instanceof Object)
+            };
+        },
+        read: function (info) {
+            return $('<div></div>');
+        },
+        write: function (info) {
+            info["index"] = ++this._index;
+            /** 对核心元素list施加复杂的注释。
+             * @type {Array} 它混合了当前SELECT选中项的所有内容。
+             * 对于每一个选中项，其存储结构为：
+             * {
+             *      type: string = 'custom'|'select'
+             *      obj: jQuery Object
+             *      data: json
+             * }
+             * 对于每一个在select_list中的元素，其存储结构为：
+             * {
+             *      obj: jQuery Object
+             *      data: json
+             * }
+             * 不需要直接控制。使用函数去操作这些数据。
+             */
+            info["list"] = [];
+            info["select_list"] = []; //存所有未被选中的SELECT名单中的数据。
+            var next_use = function (arr) {
+                //返回一个数组中下一个可用的下标。
+                for(var i in arr)
+                    if(arr[i] === null) return i;
+                return arr.length
+            };
+            var get_func_add_select_item = function (index) {
+                return function () {
+                    add_select_item(index)
+                }
+            };
+            var get_func_trash_item = function (index) {
+                return function () {
+                    trash_item(index)
+                }
+            };
+
+            var add_select_list_item = function (json) {
+                //向待选select列表内添加一项数据。
+                var id = next_use(info.select_list);
+                var obj = $('<span class="badge badge-secondary m-1"></span>')
+                    .append($('<a class="text-white" href="javascript:void(0)"></a>')
+                        .text(info.foreignHeader(json))
+                        .click(get_func_add_select_item(id)));
+                info.write_collapse_tab.append(obj);
+                info.select_list[id] = {
+                    obj: obj,
+                    data: json
+                };
+            };
+            var add_select_item = function (index) {
+                //从待选列表内摘出索引为index的项加入已选列表。
+                var id = next_use(info.list);
+                if(index < info.select_list.length && info.select_list[index] !== null) {
+                    var data = info.select_list[index].data;
+                    var obj = $('<span class="badge badge-secondary m-1"></span>')
+                        .append($('<a class="text-white" href="javascript:void(0)"></a>')
+                            .text(info.foreignHeader(data))
+                            .click(get_func_trash_item(id)));
+                    info.write_show_tab.append(obj);
+                    info.list[id] = {
+                        obj: obj,
+                        data: data,
+                        type: 'select'
+                    };
+                    info.select_list[index].obj.remove();
+                    info.select_list[index] = null;
+                }
+            };
+            var add_custom_item = function (value) {
+                //向列表内添加一项新的自定义项。不过在这之前，还会先执行查询，判断是否存在同名内容。
+                if(value !== null && value.trim() !== "") {
+                    var repeatIn = null;
+                    if(info.customRepeatCheck !== null) {
+                        for (var i in info.select_list) {
+                            if (info.select_list[i] !== null && info.customRepeatCheck(value, info.select_list[i].data)) {
+                                repeatIn = i;
+                                break;
+                            }
+                        }
+                        for(i in info.list) {
+                            if(info.list[i] !== null) {
+                                if((info.list[i].type === 'select' && info.customRepeatCheck(value, info.list[i].data))||
+                                    (info.list[i].type === 'custom' && value === info.list[i].data)){
+                                    //这意味着已经存在一个重复的了。
+                                    return;
+                                }
+
+                            }
+                        }
+                    }
+                    if(repeatIn!==null) add_select_item(repeatIn);
+                    else{
+                        var id = next_use(info.list);
+                        var data = value;
+                        var obj = $('<span class="badge badge-secondary m-1"></span>')
+                            .append($('<a class="text-white" href="javascript:void(0)"></a>')
+                                .text(info.customHeader(value))
+                                .click(get_func_trash_item(id)));
+                        info.write_show_tab.append(obj);
+                        info.list[id] = {
+                            obj: obj,
+                            data: data,
+                            type: 'custom'
+                        };
+                    }
+                }
+            };
+            var clear_all_item = function () {
+                //清空所有选择项，把select返还到待选列表。
+                for(var i in info.list)trash_item(i);
+                info.list = [];
+            };
+            var trash_item = function (index) {
+                //将该序号的已选项删除。如果是select项会返还到待选列表。
+                if(index < info.list.length && info.list[index] !== null) {
+                    if(info.list[index].type === 'select') {
+                        add_select_list_item(info.list[index].data);
+                    }
+                    info.list[index].obj.remove();
+                    info.list[index] = null;
+                }
+            };
+            var trash_all_select_item = function () {
+                for(var i in info.select_list) {
+                    if(info.select_list[i] !== null) {
+                        info.select_list[i].obj.remove();
+                    }
+                }
+                info.select_list = [];
+            };
+            var ret = $('<div class="row"></div>')
+                .append($('<div id="write_show_tab" class="col-12"></div>'))
+                .append($('<div class="col-12"></div>')
+                    .append($('<div class="btn-group"></div>')));
+
+            info["write_show_tab"] = ret.find("#write_show_tab");
+
+            if(info.allowCustom) {
+                ret.find(".btn-group")
+                    .append($('<input type="text" id="custom_add_input" class="form-control rounded-0"/>'))
+                    .append($('<button id="custom_add_button" class="btn btn-outline-secondary"><i class="fa fa-plus"></i></button>'))
+                info["custom_add_input"] = ret.find("#custom_add_input");
+                ret.find("#custom_add_button").click(function () {
+                    add_custom_item(info.custom_add_input.val());
+                    info.custom_add_input.val("");
+                });
+                info.custom_add_input.keypress(function (event) {
+                    if(event.keyCode === 13) {
+                        add_custom_item(info.custom_add_input.val());
+                        info.custom_add_input.val("");
+                    }
+                });
+            }
+            if(info.allowForeign) {
+                info["request_refresh"] = function() {
+                    //请求刷新数据源。
+                    info.request_running = true;
+                    info.foreignRequest(function (data) {
+                        clear_all_item();
+                        trash_all_select_item();
+                        for(var i in data) add_select_list_item(data[i]);
+                        info.request_running = false;
+                        if(info.request_write_waiting !== null) {
+                            info.write_set(info.request_write_waiting.writeEle, info.request_write_waiting.value);
+                            info.request_write_waiting = null;
+                        }
+                    });
+                };
+                info["request_write"] = function(writeEle, value) {
+                    //在线程安全的情况下提交一组对write的修改。
+                    //内容会等待，直到request running任务结束才会执行。
+                    if(info.request_running) {
+                        info.request_write_waiting = {writeEle: writeEle, value: value};
+                    }else{
+                        info.write_set(writeEle, value);
+                    }
+                };
+                info["request_write_waiting"] = null; //内部参数。如果write提交遇到了阻塞，会放在这里面等待完成。
+                info["request_running"] = false; //这个参数给set看的，让它知道当前是否在执行内容刷新任务。
+                info["write_set"] = function(writeEle, value) {
+                    //立刻修改write组件展示的内容。不建议直接调用，建议由refresh函数和submit函数来调用。
+                    //这个函数是在外部SET时使用的。内部增删不使用它。
+                    clear_all_item();
+                    for(var k in value){
+                        for(var i in info.select_list) {
+                            if(info.select_list[i] !== null && info.isValueContent(value[k], info.select_list[i].data)) {
+                                add_select_item(i);
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                ret.find(".btn-group")
+                    .append($('<button class="btn btn-outline-secondary" style="text-align: left" data-toggle="collapse"> </button>')
+                        .attr('data-target', '.tag-collapse-' + info.index)
+                        .append(info.collapseTitle + ' '));
+                ret.append($('<div class="col-12 mt-2"></div>')
+                    .append($('<div id="write_collapse_tab" class="collapse tag-collapse-' + info.index + '"></div>')));
+                info["write_collapse_tab"] = ret.find("#write_collapse_tab");
+                //请求数据源。
+                info.request_running = true;
+                info.foreignRequest(function (data) {
+                    for(var i in data) add_select_list_item(data[i]);
+                    info.request_running = false;
+                    if(info.request_write_waiting !== null) {
+                        info.write_set(info.request_write_waiting.writeEle, info.request_write_waiting.value);
+                        info.request_write_waiting = null;
+                    }
+                });
+            }
+            return ret;
+        },
+        get: function (info, ele) {
+            var ret = [];
+            for(var i in info.list) {
+                if(info.list[i] !== null) {
+                    var data = info.list[i].data;
+                    if(info.list[i].type === 'select') {
+                        ret.push(info.foreignValue(data));
+                    }else{
+                        ret.push(info.customValue(data));
+                    }
+                }
+            }
+            return ret;
+        },
+        set: function (info, readEle, writeEle, value) {
+            //设置值。
+            if(readEle!==null) {
+                //var first = true;
+                readEle.html("");
+                for(var i in value) {
+                    if(value[i] != null) {
+                        //if(first)first = false;else readEle.append(" ");
+                        var str = (value[i] !== null) ? info.readHeader(value[i]) : "";
+                        var link = null;
+                        if($.isFunction(info.link))link = info.link(value[i]);
+                        else if(info.link !== null)link = info.link;
+                        readEle.append($('<span class="badge badge-secondary m-1"></span>')
+                            .append((link !== null)?$('<a class="text-white"></a>').text(str):str));
+                    }
+                }
+            }
+            if(writeEle!==null) {
+                if("request_write" in info)info.request_write(writeEle, value);
+            }
+        },
+        refresh: function (info, readEle, writeEle, origin_value) {
+            //为了节省资源，只在value中包含新建的资源时刷新。
+            if(info.allowForeign && origin_value) {
+                for(var i in origin_value) {
+                    if(info.isNewValue(origin_value[i])) {
+                        info.request_refresh();
+                        break;
                     }
                 }
             }
@@ -1476,7 +1764,7 @@ var default_detail_field_elements = "text";
  *      allowNull: bool = false 是否允许null。在内容为空时，会返回null。
  *      length: int = undefined 给出长度限制
  * }
- *  password: {
+ * password: {
  *      placeholder: string = undefined 为文本框添加底部提示文本
  *
  *      allowBlank: bool = true 是否允许内容为空
@@ -1516,6 +1804,22 @@ var default_detail_field_elements = "text";
  *      foreignValue: function(json) 用于生成准备提交的数据。
  *      customContent: [{}] 自定义项的子项。内容可以填写与CREATE面板其他组件相同的结构。
  *      showContent: function(json) 生成read模式下展示用的内容。
+ *      isValueContent: function(json, goal) 进行对比判断，判断传给write函数的某个json值是否与select列表中取得的值相等。默认的对比函数将对比二者的id，然后再比对二者自身。
+ *      isNewValue: function(value) 用在refresh中，判断一个数据是否是新建资源。默认判断其是否不是object。
+ *      link: string|function(json) = null 是否将read模式下的文本转换为链接。
+ *  }
+ *  tag: {
+ *      allowForeign: bool = true 启用外部列表
+ *      allowCustom: bool = true 启用自定义添加
+ *      foreignRequest: function(function(json)) 回调函数，直接调用此函数取得默认列表参数。要求不直接返回值，而是通过传入的回调函数参数返回。
+ *      foreignValue: function(json) 用于根据foreign生成准备提交的数据。
+ *      foreignHeader: function(json) 根据foreign生成准备展示的数据。
+ *      customValue: function(value) 根据custom给出的值生成准备提交的数据。
+ *      customHeader: function(value) 根据custom的值生成准备展示的数据。
+ *      readHeader: function(json) 根据得到的数据生成展示的数据。
+ *
+ *      customRepeatCheck: function(value, json) 会于select数据比对，判断是否有重复。不给出这个参数就不会执行该过程。
+ *
  *      isValueContent: function(json, goal) 进行对比判断，判断传给write函数的某个json值是否与select列表中取得的值相等。默认的对比函数将对比二者的id，然后再比对二者自身。
  *      isNewValue: function(value) 用在refresh中，判断一个数据是否是新建资源。默认判断其是否不是object。
  *      link: string|function(json) = null 是否将read模式下的文本转换为链接。

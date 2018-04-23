@@ -67,6 +67,7 @@ class AnimeDetailView(@Autowired p: ConstProxy): HtmlView(DataTemplateBasic::cla
                 {header: "其他名", field: "other_name", type: "text", typeInfo: {length: 128, allowBlank: true, allowNull: true}},
                 "hr",
                 {header: "系列", field: "series", type: "foreignChoice", typeInfo: series_type},
+                {header: "番剧", field: null, type: "constLink", typeInfo: {text: "所有下属番剧 >>", link: function(json) {return "${proxyURL("web_data_bangumi_list")}?anime_id__eq="+json.id}}},
                 "hr",
                 {header: "作者", field: "author", type: "foreignChoice", typeInfo: author_type},
                 {header: "原作", field: "type", type: "mapping", typeInfo: {map: typeMapping}},

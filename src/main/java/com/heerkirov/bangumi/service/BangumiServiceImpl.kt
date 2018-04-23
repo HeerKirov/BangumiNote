@@ -62,7 +62,7 @@ class BangumiServiceImpl(@Autowired val dao: Dao): BangumiService {
     private fun DatabaseMiddleware.analysisCommit(anime: Anime) {
         //这个函数用来处理bangumi的commit的问题。
         //在更新bangumi时，需要把commit相关信息向上更新。
-        val bangumiList = this.query(Bangumi::class).where(Restrictions.eq("anime", anime)).all()
+        val bangumiList = this.query(Bangumi::class).where(Restrictions.eq("anime", anime)).joinSelect(fetchSelectList).all()
         anime.scoreLike = bangumiList.mapNotNull { it.scoreLike }.average()
         anime.scorePatient = bangumiList.mapNotNull { it.scorePatient }.average()
         anime.makeMake = bangumiList.mapNotNull { it.makeMake }.average()
