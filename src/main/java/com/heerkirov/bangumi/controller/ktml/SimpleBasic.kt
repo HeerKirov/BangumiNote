@@ -9,7 +9,7 @@ import com.heerkirov.ktml.element.*
  */
 class SimpleBasic : HtmlView(Meta::class, {
     impl("TOP_BAR", nav(clazz = "navbar navbar-expand-sm bg-dark navbar-dark"){
-        a_(clazz = "navbar-brand", href = "/") { proxyStr("val_logo")}
+        a_(clazz = "navbar-brand", href = "/BangumiNote/") { proxyStr("val_logo")}
     })
     impl("BOTTOM_BAR", div(clazz = "container-fluid") {
         div(clazz = "row mt-5") {

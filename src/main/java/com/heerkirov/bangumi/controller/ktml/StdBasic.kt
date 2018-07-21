@@ -7,7 +7,7 @@ import com.heerkirov.ktml.element.*
  */
 class StdBasic : HtmlView(Meta::class, {
     impl("TOP_BAR", nav(clazz = "navbar navbar-expand-sm bg-dark navbar-dark") {
-        a_(clazz = "navbar-brand", href = "/") { proxyStr("val_logo") }
+        a_(clazz = "navbar-brand", href = "/BangumiNote/") { proxyStr("val_logo") }
         if(attrAs("security_authority")) {
             //toggle/collapse button
             button(clazz = "navbar-toggler", type = "button", dataToggle = "collapse", dataTarget = "#collapsible_navbar") {
@@ -97,7 +97,7 @@ class StdBasic : HtmlView(Meta::class, {
             url: "${proxyURL("api_user_logout")}",
             dataType: 'json',
             success: function() {
-                location.href = "/"
+                location.href = "/BangumiNote/"
             },
             error: function () {
                 alert("登出时发生错误。")
