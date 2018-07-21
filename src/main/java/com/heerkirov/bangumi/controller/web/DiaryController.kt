@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
-@RequestMapping("/web/diaries")
+@RequestMapping("/BangumiNote/web/diaries")
 class DiaryController: HtmlController() {
     @RequestMapping("")
     fun diaryPage() = servlet(DiaryView::class)

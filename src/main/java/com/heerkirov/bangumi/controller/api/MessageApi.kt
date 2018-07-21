@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import javax.servlet.http.HttpServletRequest
 
 @Controller
-@RequestMapping("/api/message")
+@RequestMapping("/BangumiNote/api/message")
 class MessageApi(@Autowired private val httpServletRequest: HttpServletRequest,
                  @Autowired private val security: Security,
                  @Autowired private val messageService: MessageService): ApiController() {

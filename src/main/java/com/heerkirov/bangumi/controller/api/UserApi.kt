@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest
 import kotlin.collections.HashMap
 
 @Controller
-@RequestMapping("/api/user")
+@RequestMapping("/BangumiNote/api/user")
 class UserApi(@Autowired private val security: Security,
               @Autowired private val userService: UserService,
               @Autowired private val optionalService: OptionalService,

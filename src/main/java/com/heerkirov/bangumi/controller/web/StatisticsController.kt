@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
-@RequestMapping("/web/statistics")
+@RequestMapping("/BangumiNote/web/statistics")
 class StatisticsController: HtmlController() {
     @RequestMapping("")
     fun navPage() = servlet(StatisticsNavView::class)

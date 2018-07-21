@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseStatus
 
-@Controller @RequestMapping("/api/content/series")
+@Controller @RequestMapping("/BangumiNote/api/content/series")
 class SeriesApi(@Autowired private val seriesService: SeriesService): UserBelongRestfulController<Series, Int>(Series::class) {
     override val service = seriesService
     override val converter = ModelConverter(Series::class, arrayOf(
@@ -38,7 +38,7 @@ class SeriesApi(@Autowired private val seriesService: SeriesService): UserBelong
                     Filter.FilterField(Int::class, "uid"),
                     Filter.FilterField(String::class, "name")))
 }
-@Controller @RequestMapping("/api/content/authors")
+@Controller @RequestMapping("/BangumiNote/api/content/authors")
 class AuthorApi(@Autowired private val authorService: AuthorService): UserBelongRestfulController<Author, Int>(Author::class) {
     override val service = authorService
     override val converter = ModelConverter(Author::class, arrayOf(
@@ -64,7 +64,7 @@ class AuthorApi(@Autowired private val authorService: AuthorService): UserBelong
                     Filter.FilterField(String::class, "name"),
                     Filter.FilterField(String::class, "origin_name", modelName = "originName")))
 }
-@Controller @RequestMapping("/api/content/companies")
+@Controller @RequestMapping("/BangumiNote/api/content/companies")
 class CompanyApi(@Autowired private val companyService: CompanyService): UserBelongRestfulController<Company, Int>(Company::class) {
     override val service = companyService
     override val converter = ModelConverter(Company::class, arrayOf(
@@ -90,7 +90,7 @@ class CompanyApi(@Autowired private val companyService: CompanyService): UserBel
                     Filter.FilterField(String::class, "name"),
                     Filter.FilterField(String::class, "origin_name", modelName = "originName")))
 }
-@Controller @RequestMapping("/api/content/animes")
+@Controller @RequestMapping("/BangumiNote/api/content/animes")
 class AnimeApi(@Autowired private val animeService: AnimeService): UserBelongRestfulController<Anime, Int>(Anime::class) {
     override val service = animeService
     private val seriesSubConverter: ModelConverter<Series> = IdConverter(Series::class, arrayOf(
@@ -169,7 +169,7 @@ class AnimeApi(@Autowired private val animeService: AnimeService): UserBelongRes
                     Filter.FilterField(Int::class, "author_id", innerJoin = "authorList", modelName = "id"),
                     Filter.FilterField(Int::class, "tag_id", innerJoin = "tagList", modelName = "id")))
 }
-@Controller @RequestMapping("/api/content/bangumis")
+@Controller @RequestMapping("/BangumiNote/api/content/bangumis")
 class BangumiApi(@Autowired private val bangumiService: BangumiService): UserBelongRestfulController<Bangumi, Int>(Bangumi::class) {
     override val service: RestfulService<Bangumi> = bangumiService
     private val animeSubConverter: ModelConverter<Anime> = IdConverter(Anime::class, arrayOf(
@@ -269,7 +269,7 @@ class BangumiApi(@Autowired private val bangumiService: BangumiService): UserBel
                     Filter.FilterField(Boolean::class, "multiple_time", modelName = "multipleTime"),
                     Filter.FilterField(Boolean::class, "seen_the_original", modelName = "seenTheOriginal")))
 }
-@Controller @RequestMapping("/api/content/tags")
+@Controller @RequestMapping("/BangumiNote/api/content/tags")
 class TagApi(@Autowired private val tagService: TagService): UserBelongRestfulController<Tag, Int>(Tag::class) {
     override val service: RestfulService<Tag> = tagService
     private val parentSubConverter: ModelConverter<Tag> = IdConverter(Tag::class, arrayOf(
@@ -300,7 +300,7 @@ class TagApi(@Autowired private val tagService: TagService): UserBelongRestfulCo
                     Filter.FilterField(String::class, "name"),
                     Filter.FilterField(Int::class, "parent", modelName = "parent.id")))
 }
-@Controller @RequestMapping("/api/content/bangumis/{parentId}/episodes")
+@Controller @RequestMapping("/BangumiNote/api/content/bangumis/{parentId}/episodes")
 class EpisodeApi(@Autowired private val episodeService: EpisodeService): UserBelongNestedController<Episode>(Episode::class) {
     override val service: RestfulService<Episode> = episodeService
     override val converter: ModelConverter<Episode> = ModelConverter(Episode::class, arrayOf(

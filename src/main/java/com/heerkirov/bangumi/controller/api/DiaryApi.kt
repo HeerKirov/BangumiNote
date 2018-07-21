@@ -19,7 +19,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.servlet.ModelAndView
 
-@Controller @RequestMapping("/api/diaries")
+@Controller @RequestMapping("/BangumiNote/api/diaries")
 class DiaryApi(@Autowired private val diaryService: DiaryService): UserBelongRestfulController<Diary, Int>(Diary::class) {
     override val service = diaryService
 

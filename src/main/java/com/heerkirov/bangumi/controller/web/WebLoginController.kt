@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KClass
 
 @Controller
-@RequestMapping("/web")
+@RequestMapping("/BangumiNote/web")
 class WebLoginController : HtmlController() {
     override val securityLogined: Boolean = false
     override fun<V: HtmlView> servlet(view: KClass<V>, viewModel: HashMap<String, Any?>): Any {

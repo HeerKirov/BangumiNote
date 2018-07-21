@@ -4,7 +4,7 @@ import com.heerkirov.ktml.builder.ConstProxy
 import org.springframework.stereotype.Component
 
 @Component
-class Proxy : ConstProxy({
+class Proxy : ConstProxy("/BangumiNote", {
     dim("val_logo", "番组笔记")
     //web login系列地址
     url("web_login", {"/web/login"})

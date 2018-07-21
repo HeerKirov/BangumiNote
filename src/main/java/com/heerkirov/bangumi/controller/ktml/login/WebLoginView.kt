@@ -54,7 +54,7 @@ class WebLoginView(@Autowired p: ConstProxy): HtmlView(SimpleBasic::class, p, {
         ${'$'}.ajax({
             type: "POST",
             async: false,
-            url: "/api/user/login.json",
+            url: "${proxyURL("api_user_login")}",
             data: {json: JSON.stringify(data)},
             dataType: 'json',
             success: function() {

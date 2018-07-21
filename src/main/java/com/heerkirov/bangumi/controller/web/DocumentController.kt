@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
-@RequestMapping("/web/self")
+@RequestMapping("/BangumiNote/web/self")
 class DocumentController : HtmlController() {
     @RequestMapping("/document")
     fun documentPage() = servlet(DocumentView::class)
