@@ -1,6 +1,6 @@
 # BangumiNote
 番組笔记项目的Web端。  
-_该项目正在开发中。_
+_该项目已经停止维护。正在开发的新项目：[BangumiNote-Python](https://github.com/HeerKirov/BangumiNote-Python/)。_
 ## 简介
 个人项目。主要功能：
 
